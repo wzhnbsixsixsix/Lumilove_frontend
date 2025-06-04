@@ -35,21 +35,38 @@ export default function LoginPage() {
       })
 
       const text = await response.text();
+      console.log('Raw login response:', text);  // 打印原始响应
+      
       let data;
       try {
         data = JSON.parse(text);
+        console.log('Parsed login response:', data);  // 打印解析后的数据
       } catch (e) {
         console.error("Response parsing error:", e);
         throw new Error('服务器响应格式错误');
       }
 
       if (response.ok) {
-        // 存储token和用户信息
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // 检查响应数据结构
+        if (!data.accessToken) {
+          console.error('Login response missing accessToken:', data);
+          throw new Error('服务器响应缺少accessToken');
+        }
+
+        // 存储纯 accessToken，不加 Bearer 前缀
+        const token = data.accessToken.replace(/^Bearer\s+/, '');
+        console.log('Storing token (no Bearer):', token)
+        localStorage.setItem('token', token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        
+        // 验证存储是否成功
+        const storedToken = localStorage.getItem('token')
+        console.log('Stored token:', storedToken)
+        
         router.push("/") // 登录成功后跳转到首页
       } else {
-        setError(data.message || "登录失败，请检查邮箱和密码");
+        console.error('Login failed:', data);  // 打印登录失败信息
+        setError(data.message || "登录失败，请检查邮箱和密码")
       }
     } catch (error) {
       console.error("Login error:", error)

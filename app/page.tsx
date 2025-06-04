@@ -14,6 +14,7 @@ import { useState, useEffect } from "react"
 interface User {
   username: string;
   email: string;
+  avatar?: string;
 }
 
 export default function Home() {
@@ -21,22 +22,71 @@ export default function Home() {
   const [activeTag, setActiveTag] = useState("For You")
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // 检查登录状态
-    const token = localStorage.getItem('token')
-    const userData = localStorage.getItem('user')
-    if (token && userData) {
-      setIsLoggedIn(true)
-      setUser(JSON.parse(userData))
+    const checkAuth = async () => {
+      setIsLoading(true)
+      const token = localStorage.getItem('token')
+      const userData = localStorage.getItem('user')
+      
+      console.log('Auth check - Token:', token)
+      
+      if (token && userData) {
+        try {
+          const tokenValue = `Bearer ${token}`;
+          console.log('Sending token:', tokenValue)
+          
+          const response = await fetch('/api/auth/verify', {
+            method: 'GET',
+            headers: {
+              'Authorization': tokenValue,
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+          })
+          
+          console.log('Verify response status:', response.status)
+          const responseText = await response.text()
+          console.log('Verify response body:', responseText)
+          
+          if (response.ok) {
+            console.log('Token verification successful')
+            setIsLoggedIn(true)
+            setUser(JSON.parse(userData))
+          } else {
+            console.log('Token verification failed, clearing auth data')
+            handleLogout()
+          }
+        } catch (error) {
+          console.error('Token verification error:', error)
+          handleLogout()
+        }
+      } else {
+        console.log('No token or user data found')
+        setIsLoggedIn(false)
+        setUser(null)
+      }
+      setIsLoading(false)
     }
+
+    checkAuth()
   }, [])
 
   const handleLogout = () => {
+    console.log('Logging out, clearing auth data')
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setIsLoggedIn(false)
     setUser(null)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    )
   }
 
   // Mock data for male characters
