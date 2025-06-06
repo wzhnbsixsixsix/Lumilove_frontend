@@ -98,7 +98,7 @@ export default function Home() {
       tags: ["Alpha", "Mature"],
       description: "The successful CEO who knows what he wants. Will you be his next conquest?",
       chatCount: "1.4M",
-      imageSrc: "/placeholder.svg?height=400&width=300",
+      imageSrc: "/alexander_avatar.png",
     },
     {
       id: 2,
@@ -156,11 +156,11 @@ export default function Home() {
   // Filter characters based on active gender and tag
   const characters = activeGender === "guys" ? maleCharacters : femaleCharacters
   const filteredCharacters =
-    activeTag === "For You" ? characters : characters.filter((char) => char.tags.includes(activeTag))
+    activeTag === "For You" ? characters : characters.filter((char) => char.tags.includes(activeTag)) 
 
   // Mock data for trending characters
   const trendingCharacters = [
-    { id: 1, name: "Alexander", occupation: "Businessman", rank: 1, imageSrc: "/placeholder.svg?height=50&width=50" },
+    { id: 1, name: "Alexander", occupation: "Businessman", rank: 1, imageSrc: "/alexander_avatar.png" },
     { id: 2, name: "Dominic", occupation: "Mafia", rank: 2, imageSrc: "/placeholder.svg?height=50&width=50" },
     { id: 3, name: "Ethan Blake", occupation: "Actor", rank: 3, imageSrc: "/placeholder.svg?height=50&width=50" },
     { id: 4, name: "Gray", occupation: "Businessman", rank: 4, imageSrc: "/placeholder.svg?height=50&width=50" },
@@ -234,7 +234,7 @@ export default function Home() {
     {
       id: 2,
       name: "Alexander",
-      imageSrc: "/placeholder.svg?height=50&width=50&text=A",
+      imageSrc: "/alexander_avatar.png",//首页的recent chat的头像
     },
   ]
 

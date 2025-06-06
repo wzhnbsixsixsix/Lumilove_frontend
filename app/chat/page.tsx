@@ -23,7 +23,7 @@ export default function ChatIndexPage() {
       name: "Alexander",
       occupation: "Businessman",
       lastMessage: "I've been thinking about you...",
-      imageSrc: "/placeholder.svg?height=50&width=50&text=A",
+      imageSrc: "alexander_avatar.png",
       timestamp: "Yesterday",
       unread: false,
     },
