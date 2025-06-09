@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Sidebar from "@/components/sidebar"
+import { login, sendChatMessage } from '@/lib/api';
 
 export default function ChatIndexPage() {
   const router = useRouter()

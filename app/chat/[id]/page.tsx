@@ -3,6 +3,10 @@
 import type React from "react";
 
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useParams } from "next/navigation";
+
+// ... 其余代码保持不变
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -24,6 +28,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { login, sendChatMessage } from "@/lib/api";
+
 import Sidebar from "@/components/sidebar";
 import {
   Dialog,
@@ -34,7 +40,27 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-export default function ChatPage({ params }: { params: { id: string } }) {
+// 添加消息类型定义
+interface Message {
+  id: number;
+  sender: "user" | "ai";
+  text: string;
+  timestamp: string;
+  audioDuration?: number;
+  hasImage?: boolean;
+  imageSrc?: string;
+}
+
+export default function ChatPage() {
+  // 使用 use 解包 params
+
+  const params = useParams();
+  const chatId = params.id as string;
+
+  // 修改 messages 状态定义
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [token, setToken] = useState<string | null>(null);
+
   // Character data based on ID
   const characters = {
     "1": {
@@ -46,7 +72,7 @@ export default function ChatPage({ params }: { params: { id: string } }) {
       followers: "1.1M",
       description:
         "The talented swimmer who dominates the competition. But you're the only one who knows about your secret romance. Will he ever make it public, or will your love remain hidden forever?",
-      images: ["/public/alexander_avatar.png"],
+      images: ["/alexander_avatar.png"],
       messages: [
         {
           id: 1,
@@ -119,7 +145,7 @@ export default function ChatPage({ params }: { params: { id: string } }) {
       followers: "980K",
       description:
         "The charming plumber with a playful smile and skilled hands. What started as a routine house call has turned into something much more exciting. He's ready to fix more than just your pipes.",
-      images: ["/public/alexander_avatar.png"],
+      images: ["/alexander_avatar.png"],
       messages: [
         {
           id: 1,
@@ -155,7 +181,7 @@ export default function ChatPage({ params }: { params: { id: string } }) {
       followers: "1.8M",
       description:
         "A fierce and flirty entrepreneur, Rhonda sees you as her perfect partner in both business and pleasure. She's not afraid to take what she wants.",
-      images: ["/public/alexander_avatar.png"],
+      images: ["/alexander_avatar.png"],
       messages: [
         {
           id: 1,
@@ -191,7 +217,7 @@ export default function ChatPage({ params }: { params: { id: string } }) {
       followers: "2.4M",
       description:
         "A shy and repressed girl, hiding her deep attraction to you while trying to fit in. Behind her innocent facade lies passionate desires waiting to be discovered.",
-      images: ["/public/alexander_avatar.png"],
+      images: ["/alexander_avatar.png"],
       messages: [
         {
           id: 1,
@@ -229,7 +255,7 @@ export default function ChatPage({ params }: { params: { id: string } }) {
         "A reserved mother with a hidden perverted side, she will do anything to satisfy your desires. Your new neighbor with secrets she's dying to share.",
       images: [
         "/placeholder.svg?height=200&width=150&text=Anshu-1",
-        "/public/alexander_avatar.png",
+        "/alexander_avatar.png",
       ],
       messages: [
         {
@@ -258,13 +284,75 @@ export default function ChatPage({ params }: { params: { id: string } }) {
       ],
     },
   };
-
-  // Get character data based on ID
+  const [isLoading, setIsLoading] = useState(false);
   const character = useMemo(() => {
-    return characters[params.id as keyof typeof characters] || characters["1"];
-  }, [params.id]);
+    return characters[chatId as keyof typeof characters] || characters["1"];
+  }, [chatId]);
 
-  const [messages, setMessages] = useState(character.messages);
+  // 在组件顶部添加 token 状态
+
+  // 修改 initializeChat 函数
+  useEffect(() => {
+    const initializeChat = async () => {
+      try {
+        console.log("Initializing chat..."); // 添加调试日志
+        const authToken = await login("w@gmail.com", "w");
+        console.log("Login successful, token:", authToken); // 添加调试日志
+        setToken(authToken);
+      } catch (error) {
+        console.error("Failed to login:", error);
+      }
+    };
+
+    initializeChat();
+  }, []); // 确保依赖数组为空，只在组件挂载时执行一次
+
+  const handleSendMessage = async () => {
+    console.log("Send button clicked", { inputValue, token }); // 添加调试日志
+
+    if (!inputValue.trim() || !token) {
+      console.log("Cannot send: missing input or token"); // 添加调试日志
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      console.log("Sending message to API..."); // 添加调试日志
+      const response = await sendChatMessage(token, inputValue, chatId);
+      console.log("API response:", response); // 添加调试日志
+
+      // Add the user's message
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          sender: "user",
+          text: inputValue,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+
+      // Add the AI's response
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          sender: "ai",
+          text: response.message,
+          timestamp: new Date().toISOString(),
+          audioDuration: 0,
+          hasImage: false,
+        },
+      ]);
+
+      setInputValue("");
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const [inputValue, setInputValue] = useState("");
   const [replyType, setReplyType] = useState("text");
   const [showReplyOptions, setShowReplyOptions] = useState(false);
@@ -309,7 +397,7 @@ export default function ChatPage({ params }: { params: { id: string } }) {
       id: 1,
       name: "Ethan",
       lastMessage: "He chuckles softly...",
-      imageSrc: "/public/alexander_avatar.png",
+      imageSrc: "/alexander_avatar.png",
       timestamp: "15:30",
       unread: params.id !== "1",
     },
@@ -377,92 +465,6 @@ export default function ChatPage({ params }: { params: { id: string } }) {
       "🤫 Private Conversation",
       "💋 Physical Touch",
     ],
-  };
-
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
-
-    // Add user message
-    const newUserMessage = {
-      id: messages.length + 1,
-      sender: "user",
-      text: inputValue,
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages([...messages, newUserMessage]);
-    setInputValue("");
-
-    // Check if we need to use quota
-    if (replyType === "picture") {
-      if (pictureQuota > 0) {
-        setPictureQuota(pictureQuota - 1);
-      } else {
-        setShowSubscriptionModal(true);
-        return;
-      }
-    } else if (replyType === "voice") {
-      if (voiceQuota > 0) {
-        setVoiceQuota(voiceQuota - 1);
-      } else {
-        setShowSubscriptionModal(true);
-        return;
-      }
-    }
-
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponses = {
-        text: [
-          "He smiles warmly at your message. \"I've been thinking about you all day. Can't wait to see you again soon.\"",
-          '"That\'s an interesting thought," he says with a playful grin. "Maybe we should explore that idea together sometime?"',
-          'He raises an eyebrow, clearly intrigued. "You always know exactly what to say to get my attention, don\'t you?"',
-          '"I miss moments like this," he admits, his voice dropping to a whisper. "Just you and me, talking about everything and nothing."',
-        ],
-        picture: [
-          'He grins at your request. "You want a picture? Well, since you asked so nicely..." He sends you a selfie he just took.',
-          '"A picture for you? I suppose I could do that," he says with a mischievous smile. "Just don\'t share it with anyone else." He sends you a photo.',
-          "He laughs. \"Demanding today, aren't we? But for you, I'll make an exception.\" He takes a moment to send you a picture.",
-          '"Your wish is my command," he says with a wink. "Here\'s something special just for you." He sends you an image.',
-        ],
-        voice: [
-          'He lowers his voice to a whisper. "I wish I could tell you this in person, but this will have to do for now..."',
-          '"Let me tell you something I\'ve never told anyone else," he says, his voice taking on a more intimate tone.',
-          'He clears his throat. "I recorded this just for you. No one else gets to hear me like this."',
-          '"Close your eyes and just listen to my voice," he suggests. "Imagine I\'m right there with you."',
-        ],
-      };
-
-      const randomIndex = Math.floor(
-        Math.random() *
-          aiResponses[replyType as keyof typeof aiResponses].length
-      );
-      const randomResponse =
-        aiResponses[replyType as keyof typeof aiResponses][randomIndex];
-      const randomDuration = Math.floor(Math.random() * 10) + 5; // Random duration between 5-15 seconds
-
-      const newAiMessage = {
-        id: messages.length + 2,
-        sender: "ai",
-        text: randomResponse,
-        timestamp: new Date().toISOString(),
-        audioDuration: randomDuration,
-        hasImage: replyType === "picture",
-        imageSrc:
-          replyType === "picture"
-            ? `/placeholder.svg?height=400&width=300&text=${character.name}-Reply`
-            : undefined,
-      };
-
-      setMessages((prevMessages) => [...prevMessages, newAiMessage]);
-
-      // Show recommendation after a few messages
-      if (messages.length > 3 && Math.random() > 0.5) {
-        setTimeout(() => {
-          setShowRecommendation(true);
-        }, 2000);
-      }
-    }, 1000);
   };
 
   const handleQuickReply = (reply: string) => {
@@ -595,11 +597,11 @@ export default function ChatPage({ params }: { params: { id: string } }) {
   }, [messages]);
 
   // Reset messages when character changes
-  useEffect(() => {
-    if (characters[params.id as keyof typeof characters]) {
-      setMessages(characters[params.id as keyof typeof characters].messages);
-    }
-  }, [params.id]);
+  // useEffect(() => {
+  //   if (characters[params.id as keyof typeof characters]) {
+  //     setMessages(characters[params.id as keyof typeof characters].messages);
+  //   }
+  // }, [params.id]);
 
   // Show recommendation after a delay
   useEffect(() => {
@@ -755,7 +757,7 @@ export default function ChatPage({ params }: { params: { id: string } }) {
                 className="h-12 w-12 rounded-full overflow-hidden mr-3"
               >
                 <Image
-                  src={`/avatar/alexander_avatar.png`}//chat页面的上面的头像照片
+                  src={`/avatar/alexander_avatar.png`} //chat页面的上面的头像照片
                   alt={character.name}
                   width={48}
                   height={48}
