@@ -17,12 +17,16 @@ import {
   Pause,
   ImageIcon,
   MessageCircle,
+  MessageSquare,
   X,
   Twitter,
   Mic,
   MicOff,
   PhoneOff,
   Lock,
+  Menu,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -429,6 +433,9 @@ const handleQuickReply = (reply: string) => {
   const [callText, setCallText] = useState("");
   const [displayedText, setDisplayedText] = useState("");
   const [isMuted, setIsMuted] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showMobileChatList, setShowMobileChatList] = useState(false);
+  const [showChatList, setShowChatList] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const callTimerRef = useRef<NodeJS.Timeout | null>(null);
   const textTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -779,27 +786,47 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
   }, []);
 
   return (
-    <div className="flex min-h-screen">
-      {/* Main Sidebar Navigation */}
-      <Sidebar />
+    <div className="flex min-h-screen relative">
+      {/* Main Sidebar Navigation - 隐藏在小屏幕上，中等屏幕显示 */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {showMobileSidebar && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setShowMobileSidebar(false)} />
+          <div className="fixed left-0 top-0 h-full w-64 bg-[#120518] border-r border-[#3a1a44] z-10">
+            <Sidebar />
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-1 h-screen overflow-hidden">
         {/* Left sidebar - Chat list */}
-        <div className="w-80 bg-[#120518] border-r border-[#3a1a44] flex flex-col h-full">
-          <div className="p-6 border-b border-[#3a1a44]">
-            <h2 className="text-2xl font-bold">Chat</h2>
+        <div className={`${showMobileChatList ? 'block' : 'hidden'} ${showChatList ? 'sm:block' : 'sm:hidden'} w-80 lg:w-96 xl:w-80 bg-[#120518] border-r border-[#3a1a44] flex flex-col h-full md:max-w-xs lg:max-w-sm xl:max-w-none transition-all duration-300`}>
+          <div className="p-4 lg:p-6 border-b border-[#3a1a44]">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl lg:text-2xl font-bold">Chat</h2>
+              <button
+                className="p-2 rounded-full hover:bg-[#2a1a34] sm:hidden"
+                onClick={() => setShowMobileChatList(false)}
+              >
+                <X className="h-5 w-5 text-gray-400" />
+              </button>
+            </div>
           </div>
           <div className="overflow-y-auto flex-1 p-2">
             {recentChats.map((chat) => (
               <Link
                 href={`/chat/${chat.id}`}
                 key={chat.id}
-                className={`flex items-start p-4 hover:bg-[#2a1a34] transition-colors rounded-xl mb-2 ${
+                className={`flex items-start p-3 lg:p-4 hover:bg-[#2a1a34] transition-colors rounded-xl mb-2 ${
                   chat.id.toString() === params.id ? "bg-[#2a1a34]" : ""
                 }`}
               >
-                <div className="relative mr-4">
-                  <div className="h-14 w-14 rounded-full overflow-hidden">
+                <div className="relative mr-3 lg:mr-4">
+                  <div className="h-12 w-12 lg:h-14 lg:w-14 rounded-full overflow-hidden">
                     <Image
                       src={chat.imageSrc || "/placeholder.svg"}
                       alt={chat.name}
@@ -809,21 +836,21 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                     />
                   </div>
                   {chat.unread && (
-                    <div className="absolute -top-1 -right-1 bg-red-500 rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold">
+                    <div className="absolute -top-1 -right-1 bg-red-500 rounded-full h-4 w-4 lg:h-5 lg:w-5 flex items-center justify-center text-xs font-bold">
                       1
                     </div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between">
-                    <h4 className="text-base font-medium truncate">
+                    <h4 className="text-sm lg:text-base font-medium truncate">
                       {chat.name}
                     </h4>
-                    <span className="text-sm text-gray-400">
+                    <span className="text-xs lg:text-sm text-gray-400">
                       {chat.timestamp}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-400 truncate">
+                  <p className="text-xs lg:text-sm text-gray-400 truncate">
                     {chat.lastMessage}
                   </p>
                 </div>
@@ -832,11 +859,42 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
           </div>
         </div>
 
+        {/* 当聊天列表隐藏时的悬浮切换按钮 */}
+        {!showChatList && (
+          <div className="hidden sm:block fixed left-20 md:left-72 top-1/2 transform -translate-y-1/2 z-10">
+            <button
+              className="bg-[#120518] border border-[#3a1a44] p-3 rounded-full hover:bg-[#2a1a34] shadow-lg transition-all duration-300"
+              onClick={() => setShowChatList(true)}
+              title="显示聊天列表"
+            >
+              <ChevronRight className="h-6 w-6 text-gray-400" />
+            </button>
+          </div>
+        )}
+
         {/* Main chat area */}
-        <div className="flex-1 flex flex-col h-full">
+        <div className="flex-1 flex flex-col h-full min-w-0">
           {/* Chat header */}
           <div className="flex items-center justify-between p-4 border-b border-[#3a1a44]">
             <div className="flex items-center">
+              {/* Mobile menu buttons */}
+              <div className="flex sm:hidden mr-2">
+                <button
+                  className="p-2 rounded-full hover:bg-[#2a1a34] mr-1"
+                  onClick={() => setShowMobileSidebar(true)}
+                  title="打开导航菜单"
+                >
+                  <Menu className="h-5 w-5 text-gray-400" />
+                </button>
+                <button
+                  className="p-2 rounded-full hover:bg-[#2a1a34]"
+                  onClick={() => setShowMobileChatList(true)}
+                  title="显示聊天列表"
+                >
+                  <MessageSquare className="h-5 w-5 text-gray-400" />
+                </button>
+              </div>
+              
               <button
                 onClick={handleProfileClick}
                 className="h-12 w-12 rounded-full overflow-hidden mr-3"
@@ -849,9 +907,22 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                   className="object-cover"
                 />
               </button>
-              <h2 className="text-xl font-semibold">{character.name}</h2>
+              <h2 className="text-lg md:text-xl font-semibold">{character.name}</h2>
             </div>
             <div className="flex items-center space-x-3">
+              {/* 桌面端聊天列表切换按钮 */}
+              <button
+                className="hidden sm:flex p-3 rounded-full hover:bg-[#2a1a34] items-center justify-center"
+                onClick={() => setShowChatList(!showChatList)}
+                title={showChatList ? "隐藏聊天列表" : "显示聊天列表"}
+              >
+                {showChatList ? (
+                  <ChevronLeft className="h-6 w-6 text-gray-400" />
+                ) : (
+                  <ChevronRight className="h-6 w-6 text-gray-400" />
+                )}
+              </button>
+              
               <button
                 className="p-3 rounded-full hover:bg-[#2a1a34]"
                 onClick={handleCallButtonClick}
@@ -1168,36 +1239,26 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
           </div>
         </div>
 
-        {/* Right sidebar - Character info */}
-        <div className="w-96 bg-[#120518] border-l border-[#3a1a44] flex flex-col h-full">
-          <div className="p-6 border-b border-[#3a1a44]">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center">
-                <button
-                  onClick={handleProfileClick}
-                  className="h-16 w-16 rounded-full overflow-hidden mr-4"
-                >
-                  <Image
-                    src={`/placeholder-icon.png?height=64&width=64&text=${character.name.charAt(
-                      0
-                    )}`}
-                    alt={character.name}
-                    width={64}
-                    height={64}
-                    className="object-cover"
-                  />
-                </button>
-                <div>
-                  <h3 className="text-xl font-semibold">{character.name}</h3>
-                  <p className="text-base text-gray-400">
-                    {character.age} years, {character.occupation}
-                  </p>
-                </div>
+        {/* Right sidebar - Character Profile */}
+        <div className="hidden xl:flex w-80 bg-[#120518] border-l border-[#3a1a44] flex-col h-full">
+          <div className="p-6">
+            <div className="text-center mb-6">
+              <div className="h-32 w-32 rounded-full overflow-hidden mx-auto mb-4">
+                <Image
+                  src={character.images[0] || "/placeholder.svg"}
+                  alt={character.name}
+                  width={128}
+                  height={128}
+                  className="object-cover w-full h-full"
+                />
               </div>
+              <h3 className="text-xl font-bold mb-1">{character.name}</h3>
+              <p className="text-sm text-gray-400 mb-3">{character.occupation}, {character.age}</p>
+              
               <Button
+                variant="outline"
                 size="sm"
-                variant="default"
-                className={`text-base px-4 py-2 h-auto ${
+                className={`text-sm px-4 py-2 h-auto ${
                   isFollowing
                     ? "bg-[#2a1a34] hover:bg-[#3a1a44]"
                     : "bg-pink-500 hover:bg-pink-600"
@@ -1214,18 +1275,18 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                   <Badge
                     key={index}
                     variant="outline"
-                    className="bg-[#1a0a24] text-sm px-3 py-1"
+                    className="bg-[#1a0a24] text-xs px-2 py-1"
                   >
                     {tag}
                   </Badge>
                 ))}
               </div>
               <div className="flex items-center">
-                <span className="text-base mr-2">{character.followers}</span>
+                <span className="text-sm mr-2">{character.followers}</span>
                 <button onClick={() => setIsFavorite(!isFavorite)}>
                   <Heart
                     className={cn(
-                      "h-5 w-5",
+                      "h-4 w-4",
                       isFavorite
                         ? "text-pink-500 fill-pink-500"
                         : "text-gray-400"
@@ -1235,35 +1296,35 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
               </div>
             </div>
 
-            <p className="text-base text-gray-300 mb-5">
+            <p className="text-sm text-gray-300 mb-5 leading-relaxed">
               {character.description}
             </p>
 
             <Button
               variant="outline"
               size="sm"
-              className="w-full mb-4 text-base py-2 h-auto"
+              className="w-full mb-4 text-sm py-2 h-auto"
               onClick={handleShareCharacter}
             >
-              <Share2 className="h-5 w-5 mr-2" /> Share Character
+              <Share2 className="h-4 w-4 mr-2" /> Share Character
             </Button>
           </div>
 
           <div className="flex-1 overflow-y-auto">
             <Tabs defaultValue="pictures" className="w-full">
               <TabsList className="grid grid-cols-3 w-full">
-                <TabsTrigger value="pictures" className="text-base py-3">
+                <TabsTrigger value="pictures" className="text-xs py-2">
                   📸 Pictures
                 </TabsTrigger>
-                <TabsTrigger value="videos" className="text-base py-3">
+                <TabsTrigger value="videos" className="text-xs py-2">
                   🎥 Videos
                 </TabsTrigger>
-                <TabsTrigger value="profile" className="text-base py-3">
+                <TabsTrigger value="profile" className="text-xs py-2">
                   📄 Profile
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="pictures" className="p-5">
-                <div className="grid grid-cols-2 gap-3">
+              <TabsContent value="pictures" className="p-4">
+                <div className="grid grid-cols-2 gap-2">
                   {character.images.map((image, index) => (
                     <div
                       key={index}
@@ -1272,67 +1333,58 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                       <Image
                         src={image || "/placeholder.svg"}
                         alt={`${character.name} ${index + 1}`}
-                        width={150}
-                        height={200}
+                        width={120}
+                        height={160}
                         className="object-cover w-full h-full"
                       />
                     </div>
                   ))}
                   <div className="aspect-[3/4] rounded-lg overflow-hidden bg-[#1a0a24] flex items-center justify-center border border-dashed border-[#3a1a44]">
-                    <div className="text-center p-4">
-                      <Lock className="h-10 w-10 text-gray-500 mx-auto mb-3" />
-                      <p className="text-base text-gray-400">
-                        Unlock Premium to see more pictures
+                    <div className="text-center p-3">
+                      <Lock className="h-6 w-6 text-gray-500 mx-auto mb-2" />
+                      <p className="text-xs text-gray-400">
+                        Unlock Premium
                       </p>
                     </div>
                   </div>
                 </div>
               </TabsContent>
-              <TabsContent value="videos" className="p-5">
-                <div className="flex items-center justify-center h-48 bg-[#1a0a24] rounded-lg">
-                  <div className="text-center p-4">
-                    <Lock className="h-10 w-10 text-gray-500 mx-auto mb-3" />
-                    <p className="text-base text-gray-400">
-                      Unlock Premium to access videos
+              <TabsContent value="videos" className="p-4">
+                <div className="flex items-center justify-center h-32 bg-[#1a0a24] rounded-lg">
+                  <div className="text-center p-3">
+                    <Lock className="h-6 w-6 text-gray-500 mx-auto mb-2" />
+                    <p className="text-xs text-gray-400">
+                      Unlock Premium
                     </p>
                   </div>
                 </div>
               </TabsContent>
-              <TabsContent value="profile" className="p-5">
-                <div className="space-y-5">
+              <TabsContent value="profile" className="p-4">
+                <div className="space-y-4">
                   <div>
-                    <h4 className="text-lg font-medium mb-2">Background</h4>
-                    <p className="text-base text-gray-400">
+                    <h4 className="text-sm font-medium mb-2">Background</h4>
+                    <p className="text-xs text-gray-400 leading-relaxed">
                       {character.name} has been{" "}
                       {character.occupation.toLowerCase()} since he was young.
-                      He's won multiple awards and is known for his dedication
-                      and skill. Despite his fame, he keeps his personal life
-                      very private.
                     </p>
                   </div>
                   <div>
-                    <h4 className="text-lg font-medium mb-2">Personality</h4>
-                    <p className="text-base text-gray-400">
-                      Confident and focused when it comes to his career, but
-                      surprisingly tender in personal relationships. He's
-                      protective of those he cares about and values loyalty
-                      above all else.
+                    <h4 className="text-sm font-medium mb-2">Personality</h4>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Confident and focused when it comes to his career.
                     </p>
                   </div>
                   <div>
-                    <h4 className="text-lg font-medium mb-2">Interests</h4>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-1.5 bg-[#1a0a24] text-base rounded-full">
+                    <h4 className="text-sm font-medium mb-2">Interests</h4>
+                    <div className="flex flex-wrap gap-1">
+                      <span className="px-2 py-1 bg-[#1a0a24] text-xs rounded-full">
                         {character.occupation}
                       </span>
-                      <span className="px-3 py-1.5 bg-[#1a0a24] text-base rounded-full">
+                      <span className="px-2 py-1 bg-[#1a0a24] text-xs rounded-full">
                         Fitness
                       </span>
-                      <span className="px-3 py-1.5 bg-[#1a0a24] text-base rounded-full">
+                      <span className="px-2 py-1 bg-[#1a0a24] text-xs rounded-full">
                         Travel
-                      </span>
-                      <span className="px-3 py-1.5 bg-[#1a0a24] text-base rounded-full">
-                        Photography
                       </span>
                     </div>
                   </div>
