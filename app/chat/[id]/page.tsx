@@ -808,12 +808,23 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
           <div className="p-4 lg:p-6 border-b border-[#3a1a44]">
             <div className="flex items-center justify-between">
               <h2 className="text-xl lg:text-2xl font-bold">Chat</h2>
-              <button
-                className="p-2 rounded-full hover:bg-[#2a1a34] sm:hidden"
-                onClick={() => setShowMobileChatList(false)}
-              >
-                <X className="h-5 w-5 text-gray-400" />
-              </button>
+              <div className="flex items-center space-x-2">
+                {/* 桌面端缩放按钮 */}
+                <button
+                  className="hidden sm:flex p-2 rounded-full hover:bg-[#2a1a34] items-center justify-center"
+                  onClick={() => setShowChatList(!showChatList)}
+                  title={showChatList ? "隐藏聊天列表" : "显示聊天列表"}
+                >
+                  <ChevronLeft className="h-5 w-5 text-gray-400" />
+                </button>
+                {/* 移动端关闭按钮 */}
+                <button
+                  className="p-2 rounded-full hover:bg-[#2a1a34] sm:hidden"
+                  onClick={() => setShowMobileChatList(false)}
+                >
+                  <X className="h-5 w-5 text-gray-400" />
+                </button>
+              </div>
             </div>
           </div>
           <div className="overflow-y-auto flex-1 p-2">
@@ -859,15 +870,17 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
           </div>
         </div>
 
-        {/* 当聊天列表隐藏时的悬浮切换按钮 */}
+
+
+        {/* 当聊天列表隐藏时的展开按钮 */}
         {!showChatList && (
-          <div className="hidden sm:block fixed left-20 md:left-72 top-1/2 transform -translate-y-1/2 z-10">
+          <div className="hidden sm:flex items-center justify-center w-8 bg-[#120518] border-r border-[#3a1a44] hover:bg-[#1a0a24] transition-colors">
             <button
-              className="bg-[#120518] border border-[#3a1a44] p-3 rounded-full hover:bg-[#2a1a34] shadow-lg transition-all duration-300"
+              className="p-2 rounded-full hover:bg-[#2a1a34] transition-all duration-300"
               onClick={() => setShowChatList(true)}
               title="显示聊天列表"
             >
-              <ChevronRight className="h-6 w-6 text-gray-400" />
+              <ChevronRight className="h-5 w-5 text-gray-400" />
             </button>
           </div>
         )}
@@ -910,19 +923,6 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
               <h2 className="text-lg md:text-xl font-semibold">{character.name}</h2>
             </div>
             <div className="flex items-center space-x-3">
-              {/* 桌面端聊天列表切换按钮 */}
-              <button
-                className="hidden sm:flex p-3 rounded-full hover:bg-[#2a1a34] items-center justify-center"
-                onClick={() => setShowChatList(!showChatList)}
-                title={showChatList ? "隐藏聊天列表" : "显示聊天列表"}
-              >
-                {showChatList ? (
-                  <ChevronLeft className="h-6 w-6 text-gray-400" />
-                ) : (
-                  <ChevronRight className="h-6 w-6 text-gray-400" />
-                )}
-              </button>
-              
               <button
                 className="p-3 rounded-full hover:bg-[#2a1a34]"
                 onClick={handleCallButtonClick}
