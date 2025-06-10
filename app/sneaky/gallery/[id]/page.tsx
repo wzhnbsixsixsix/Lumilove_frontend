@@ -19,41 +19,41 @@ export default function GalleryPage({ params }: { params: { id: string } }) {
   const pack = {
     id: packId,
     name: packId === 2 ? "Midnight Swim" : "Unknown Pack",
-    description: "The pool is empty. The night is young. And she's waiting for you.",
+    description: "The pool is empty. The night is young. And she's waiting for you.",//midnight的画廊的图片就放这里
     images: [
       {
         id: 1,
-        src: "/placeholder.svg?height=800&width=600&text=Swim1",
+        src: "/sneaky/pack_midnight_swim_1.png",
         isLocked: false,
         isPremium: false,
       },
       {
         id: 2,
-        src: "/placeholder.svg?height=800&width=600&text=Swim2",
+        src: "/sneaky/pack_midnight_swim_2.png",
         isLocked: false,
         isPremium: false,
       },
       {
         id: 3,
-        src: "/placeholder.svg?height=800&width=600&text=Swim3",
+        src: "/sneaky/pack_midnight_swim_3.png",
         isLocked: false,
         isPremium: false,
       },
       {
         id: 4,
-        src: "/placeholder.svg?height=800&width=600&text=Swim4",
+        src: "/sneaky/pack_midnight_swim_4.png",
         isLocked: false,
         isPremium: true,
       },
       {
         id: 5,
-        src: "/placeholder.svg?height=800&width=600&text=Swim5",
+        src: "/sneaky/pack_midnight_swim_5.png",
         isLocked: true,
         isPremium: true,
       },
       {
         id: 6,
-        src: "/placeholder.svg?height=800&width=600&text=Swim6",
+        src: "/sneaky/pack_midnight_swim_6.png",
         isLocked: true,
         isPremium: true,
       },

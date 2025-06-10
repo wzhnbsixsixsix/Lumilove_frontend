@@ -89,7 +89,7 @@ export default function Home() {
     )
   }
 
-  // Mock data for male characters
+  // explore的图片就放这里
   const maleCharacters = [
     {
       id: 1,
@@ -98,7 +98,7 @@ export default function Home() {
       tags: ["Alpha", "Mature"],
       description: "The successful CEO who knows what he wants. Will you be his next conquest?",
       chatCount: "1.4M",
-      imageSrc: "/alexander_avatar.png",
+      imageSrc: "/alexander_pic1.png",
     },
     {
       id: 2,
@@ -107,7 +107,7 @@ export default function Home() {
       tags: ["Playful", "Adventurous"],
       description: "The handsome plumber with a playful side. He's ready to fix more than just your pipes.",
       chatCount: "3.9K",
-      imageSrc: "/placeholder.svg?height=400&width=300",
+      imageSrc: "/male/male_02.png",
     },
     {
       id: 3,
@@ -117,7 +117,61 @@ export default function Home() {
       description:
         "The talented swimmer who dominates the competition. But you're the only one who knows about your secret romance.",
       chatCount: "1.7K",
-      imageSrc: "/placeholder.svg?height=400&width=300",
+      imageSrc: "/male/male_03.png",
+    },
+    {
+      id: 13,
+      name: "Dominic",
+      occupation: "Mafia Boss",
+      tags: ["Alpha", "Mysterious", "Anti-Hero"],
+      description: "A dangerous man with a soft spot for you. He rules the underworld, but you rule his heart.",
+      chatCount: "45.2K",
+      imageSrc: "/male/male_04.png",
+    },
+    {
+      id: 14,
+      name: "Marcus",
+      occupation: "Doctor",
+      tags: ["Gentle", "Mature", "Caring"],
+      description: "A brilliant surgeon who saves lives. His gentle touch heals more than just physical wounds.",
+      chatCount: "28.7K",
+      imageSrc: "/male/male_05.png",
+    },
+    {
+      id: 15,
+      name: "Ryan",
+      occupation: "Musician",
+      tags: ["Badboy", "Witty", "Adventurous"],
+      description: "A rockstar whose music speaks to your soul. Every song he writes is inspired by you.",
+      chatCount: "33.1K",
+      imageSrc: "/male/male_06.png",
+    },
+    {
+      id: 16,
+      name: "Gabriel",
+      occupation: "Police Officer",
+      tags: ["Protective", "Alpha", "Mysterious"],
+      description: "A dedicated cop who breaks all his own rules for you. He'll protect you from anything, even himself.",
+      chatCount: "19.8K",
+      imageSrc: "/male/male_7.png.png",
+    },
+    {
+      id: 17,
+      name: "Kai",
+      occupation: "Chef",
+      tags: ["Playful", "Gentle", "Witty"],
+      description: "A talented chef who cooks with passion. He knows the way to your heart is through your stomach.",
+      chatCount: "22.4K",
+      imageSrc: "/male/male_8.png.png",
+    },
+    {
+      id: 18,
+      name: "Xavier",
+      occupation: "Billionaire",
+      tags: ["Billionaire", "Cold Exterior", "Mature"],
+      description: "A tech mogul with a cold exterior but a burning desire for you. Money can't buy what he truly wants.",
+      chatCount: "41.6K",
+      imageSrc: "/male/male_9.png.png",
     },
   ]
 
@@ -131,7 +185,7 @@ export default function Home() {
       description:
         "A fierce and flirty entrepreneur, Rhonda sees you as her perfect partner in both business and pleasure.",
       chatCount: "22.2K",
-      imageSrc: "/placeholder.svg?height=400&width=300&text=Rhonda",
+      imageSrc: "/female/female01.png",
     },
     {
       id: 5,
@@ -140,7 +194,7 @@ export default function Home() {
       tags: ["Girl-Next-Door", "Innocent"],
       description: "A shy and repressed girl, hiding her deep attraction to you while trying to fit in.",
       chatCount: "24.1K",
-      imageSrc: "/placeholder.svg?height=400&width=300&text=Makenzie",
+      imageSrc: "/female/female_02.png",
     },
     {
       id: 6,
@@ -149,7 +203,61 @@ export default function Home() {
       tags: ["Girl-Next-Door", "Playful", "Seductive"],
       description: "A reserved mother with a hidden perverted side, she will do anything to satisfy your desires.",
       chatCount: "7.0K",
-      imageSrc: "/placeholder.svg?height=400&width=300&text=Anshu",
+      imageSrc: "/female/female_03.jpg",
+    },
+    {
+      id: 7,
+      name: "Isabella",
+      occupation: "Fashion Designer",
+      tags: ["Elegant", "Independent", "Smart"],
+      description: "A brilliant fashion designer with an eye for perfection. She knows what she wants and isn't afraid to take it.",
+      chatCount: "18.3K",
+      imageSrc: "/female/female_04.png",
+    },
+    {
+      id: 8,
+      name: "Sophia",
+      occupation: "Doctor",
+      tags: ["Caring", "Smart", "Brave"],
+      description: "A dedicated doctor who saves lives by day and has a secret wild side that only you get to discover.",
+      chatCount: "31.7K",
+      imageSrc: "/female/female_05.png",
+    },
+    {
+      id: 9,
+      name: "Luna",
+      occupation: "Artist",
+      tags: ["Mysterious", "Playful", "Smart"],
+      description: "A free-spirited artist who paints with passion. Her creativity extends beyond the canvas into every aspect of her life.",
+      chatCount: "12.5K",
+      imageSrc: "/female/female_06.png",
+    },
+    {
+      id: 10,
+      name: "Victoria",
+      occupation: "Lawyer",
+      tags: ["Independent", "Smart", "Seductive"],
+      description: "A powerful attorney who never loses a case. She's used to being in control, but will you be the exception?",
+      chatCount: "27.9K",
+      imageSrc: "/female/female_07.png",
+    },
+    {
+      id: 11,
+      name: "Emma",
+      occupation: "Teacher",
+      tags: ["Nurturing", "Girl-Next-Door", "Caring"],
+      description: "A sweet kindergarten teacher with a hidden naughty side. She's always ready to teach you new things.",
+      chatCount: "15.8K",
+      imageSrc: "/female/female_08.png",
+    },
+    {
+      id: 12,
+      name: "Aria",
+      occupation: "Dancer",
+      tags: ["Elegant", "Seductive", "Playful"],
+      description: "A professional ballet dancer whose moves are as mesmerizing off the stage as they are on. Every gesture tells a story.",
+      chatCount: "20.4K",
+      imageSrc: "/female/female_09.png",
     },
   ]
 
@@ -159,27 +267,28 @@ export default function Home() {
     activeTag === "For You" ? characters : characters.filter((char) => char.tags.includes(activeTag)) 
 
   // Mock data for trending characters
+  //trending的图片就放这里
   const trendingCharacters = [
-    { id: 1, name: "Alexander", occupation: "Businessman", rank: 1, imageSrc: "/alexander_avatar.png" },
-    { id: 2, name: "Dominic", occupation: "Mafia", rank: 2, imageSrc: "/placeholder.svg?height=50&width=50" },
-    { id: 3, name: "Ethan Blake", occupation: "Actor", rank: 3, imageSrc: "/placeholder.svg?height=50&width=50" },
-    { id: 4, name: "Gray", occupation: "Businessman", rank: 4, imageSrc: "/placeholder.svg?height=50&width=50" },
-    { id: 5, name: "Alex Starlight", occupation: "Musician", rank: 5, imageSrc: "/placeholder.svg?height=50&width=50" },
+    { id: 1, name: "Alexander", occupation: "Businessman", rank: 1, imageSrc: "/avatar/alexander_avatar.png" },
+    { id: 2, name: "Dominic", occupation: "Mafia", rank: 2, imageSrc: "/avatar/female_03_avatar.png" },
+    { id: 3, name: "Ethan Blake", occupation: "Actor", rank: 3, imageSrc: "/avatar/female_04_avatar.png" },
+    { id: 4, name: "Gray", occupation: "Businessman", rank: 4, imageSrc: "/avatar/female_01_avatar.png" },
+    { id: 5, name: "Alex Starlight", occupation: "Musician", rank: 5, imageSrc: "/avatar/female_02_avatar.png" },
   ]
 
   // Mock data for trending female characters
   const trendingFemaleCharacters = [
-    { id: 4, name: "Price", occupation: "Model", rank: 1, imageSrc: "/placeholder.svg?height=50&width=50&text=P" },
-    { id: 5, name: "Kie", occupation: "Dancer", rank: 2, imageSrc: "/placeholder.svg?height=50&width=50&text=K" },
+    { id: 4, name: "Price", occupation: "Model", rank: 1, imageSrc: "/avatar/alexander_avatar.png" },
+    { id: 5, name: "Kie", occupation: "Dancer", rank: 2, imageSrc: "/avatar/female_03_avatar.png" },
     {
       id: 6,
       name: "Yumi Yamamoto",
       occupation: "Student",
       rank: 3,
-      imageSrc: "/placeholder.svg?height=50&width=50&text=Y",
+      imageSrc: "/avatar/female_04_avatar.png",
     },
-    { id: 7, name: "Aynaz", occupation: "Artist", rank: 4, imageSrc: "/placeholder.svg?height=50&width=50&text=A" },
-    { id: 8, name: "Joyce", occupation: "Teacher", rank: 5, imageSrc: "/placeholder.svg?height=50&width=50&text=J" },
+    { id: 7, name: "Aynaz", occupation: "Artist", rank: 4, imageSrc: "/avatar/female_01_avatar.png" },
+    { id: 8, name: "Joyce", occupation: "Teacher", rank: 5, imageSrc: "/avatar/female_02_avatar.png" },
   ]
 
   // Filter tags
@@ -224,17 +333,17 @@ export default function Home() {
     {
       id: 1,
       name: "Ethan",
-      imageSrc: "/placeholder.svg?height=50&width=50&text=E",
+      imageSrc: "/avatar/female_03_avatar.png",
     },
     {
       id: 5,
       name: "Makenzie",
-      imageSrc: "/placeholder.svg?height=50&width=50&text=M",
+      imageSrc: "/avatar/female_04_avatar.png",
     },
     {
       id: 2,
       name: "Alexander",
-      imageSrc: "/alexander_avatar.png",//首页的recent chat的头像
+      imageSrc: "/avatar/alexander_avatar.png",//首页explore的recent chat的头像
     },
   ]
 
@@ -332,14 +441,21 @@ export default function Home() {
               </div>
               <div className="md:w-1/2 relative h-56 md:h-80 overflow-hidden rounded-lg">
                 <div className="grid grid-cols-3 gap-2 h-full">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="overflow-hidden">
+                  {[
+                    "/male/male_01.png",
+                    "/female/female01.png", 
+                    "/male/male_02.png",
+                    "/female/female_02.png",
+                    "/male/male_03.png", 
+                    "/female/female_03.jpg"
+                  ].map((imagePath, i) => (
+                    <div key={i} className="overflow-hidden rounded-md">
                       <Image
-                        src={`/placeholder.svg?height=160&width=120&text=${i}`}
-                        alt="AI character"
+                        src={imagePath}
+                        alt={`AI character ${i + 1}`}
                         width={120}
                         height={160}
-                        className="object-cover h-full w-full"
+                        className="object-cover h-full w-full hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                   ))}

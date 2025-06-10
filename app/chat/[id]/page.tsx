@@ -303,51 +303,107 @@ export default function ChatPage() {
         console.error("Failed to login:", error);
       }
     };
-
+  
     initializeChat();
   }, []); // 确保依赖数组为空，只在组件挂载时执行一次
 
-  const handleSendMessage = async () => {
-    console.log("Send button clicked", { inputValue, token }); // 添加调试日志
+  // 1. 确保 handleQuickReply 函数在开头有明显的调试日志
+const handleQuickReply = (reply: string) => {
+    console.log("🔥🔥🔥 handleQuickReply 被调用了！参数:", reply);
+  
+  // 检查是否是图片类型的快速回复
+  if (hardcodedResponses[reply]) {
+      console.log("✅ 找到硬编码响应，使用硬编码");
+    const response = hardcodedResponses[reply];
+    
+    // 添加用户消息
+    const userMessage: Message = {
+      id: Date.now(),
+      sender: "user",
+      text: reply,
+      timestamp: new Date().toISOString(),
+    };
+    
+    // 添加AI响应（硬编码）
+    const aiMessage: Message = {
+      id: Date.now() + 1,
+      sender: "ai",
+      text: response.text,
+      timestamp: new Date().toISOString(),
+      audioDuration: response.audioDuration,
+      hasImage: true,
+      imageSrc: response.imageSrc,
+    };
+    
+    // 更新消息列表
+    setMessages((prev) => [...prev, userMessage, aiMessage]);
+      console.log("✅ 消息已添加");
+      return; // 重要：直接返回，不设置 inputValue
+  } else {
+      console.log("❌ 未找到硬编码响应，设置到输入框");
+    setInputValue(reply);
+  }
+};
 
+  // 2. 同时，修改 handleSendMessage，移除那个重复检查的逻辑
+  const handleSendMessage = async () => {
+    console.log("=== handleSendMessage 调用 ===");
+    console.log("输入值:", inputValue);
+    
     if (!inputValue.trim() || !token) {
-      console.log("Cannot send: missing input or token"); // 添加调试日志
+      console.log("❌ 无法发送: 缺少输入或token");
       return;
     }
 
-    setIsLoading(true);
-    try {
-      console.log("Sending message to API..."); // 添加调试日志
-      const response = await sendChatMessage(token, inputValue, chatId);
-      console.log("API response:", response); // 添加调试日志
-
-      // Add the user's message
-      setMessages((prev) => [
-        ...prev,
-        {
+    // 🔧 修复：先保存输入值，然后立即清空输入框并添加用户消息
+    const messageText = inputValue.trim();
+    setInputValue(""); // 立即清空输入框
+    
+    // 🔧 修复：立即添加用户消息到聊天记录
+    const userMessage: Message = {
           id: Date.now(),
           sender: "user",
-          text: inputValue,
+      text: messageText,
           timestamp: new Date().toISOString(),
-        },
-      ]);
+    };
+    
+    setMessages((prev) => [...prev, userMessage]);
+    console.log("✅ 用户消息已立即添加");
 
-      // Add the AI's response
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          sender: "ai",
-          text: response.message,
-          timestamp: new Date().toISOString(),
-          audioDuration: 0,
-          hasImage: false,
-        },
-      ]);
+    console.log("⚠️ 准备调用AI接口...");
+    setIsLoading(true);
+    
+    try {
+      console.log("Sending message to API...");
+      const response = await sendChatMessage(token, messageText, chatId);
+      console.log("API response:", response);
 
-      setInputValue("");
+      // 🔧 修复：只添加AI的响应消息（用户消息已经添加过了）
+      const aiMessage: Message = {
+        id: Date.now() + 1,
+        sender: "ai",
+        text: response.message,
+        timestamp: new Date().toISOString(),
+        audioDuration: 0,
+        hasImage: false,
+      };
+      
+      setMessages((prev) => [...prev, aiMessage]);
+      console.log("✅ AI响应已添加");
+      
     } catch (error) {
       console.error("Failed to send message:", error);
+      // 🔧 错误处理：如果API调用失败，可以选择显示错误消息或移除用户消息
+      // 这里我们保留用户消息，但可以添加一个错误提示
+      const errorMessage: Message = {
+        id: Date.now() + 2,
+        sender: "ai",
+        text: "抱歉，发送消息时出现了错误。请稍后再试。",
+        timestamp: new Date().toISOString(),
+        audioDuration: 0,
+        hasImage: false,
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -467,16 +523,45 @@ export default function ChatPage() {
     ],
   };
 
-  const handleQuickReply = (reply: string) => {
-    setInputValue(reply);
-  };
+  // const handleQuickReply = (reply: string) => {
+  //   setInputValue(reply);
+  // };
+
+  // ... existing code ...
+
+// 在第470行左右，替换原有的 handleQuickReply 函数
+const hardcodedResponses: Record<string, { text: string; imageSrc: string; audioDuration: number }> = {
+  "👙 Sexy Wet": {
+    text: 'Shower just finished... still dripping for you. Wanna see more?',
+    imageSrc: "/alexander_sexywet.png",
+    audioDuration: 8
+  },
+  "🧼 Bath Time": {
+    text: 'Caught me in the bath… think you can handle this much temptation?',
+    imageSrc: "/alexander_bathtime.png",
+    audioDuration: 10
+  },
+  "🛌 Lying in Bed": {
+    text: 'Lying here, wishing you were next to me… what would you do if you were?',
+    imageSrc: "/alexander_lyingbed.png",
+    audioDuration: 9
+  },
+  "🧥 Favorite Outfit": {
+    text: 'Slipped into my favorite outfit just for you… Do I make it look irresistible?',
+    imageSrc: "/alexander_favoriteoutfit.png",
+    audioDuration: 7
+  }
+};
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    // 🔧 修复：检查是否正在使用输入法进行组合输入（如中文拼音输入）
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       handleSendMessage();
     }
   };
+
+
 
   const handleAudioPlay = (messageId: number) => {
     if (isPlaying === messageId) {

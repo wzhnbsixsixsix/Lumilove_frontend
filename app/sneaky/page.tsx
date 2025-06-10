@@ -38,7 +38,7 @@ export default function SneakyPage() {
   const tagOptions = ["All", "HOT 🔥", "Limited ⏰", "New 🆕"]
   const sortOptions = ["Most Popular", "Newest", "Price ↓", "Price ↑"]
 
-  // Mock data for photo packs
+  // sneaky的封面就放这里(硬编码)
   const photoPacks = [
     {
       id: 1,
@@ -52,7 +52,7 @@ export default function SneakyPage() {
       limitedTime: "48h",
       style: "Cosplay",
       intimacy: "NSFW",
-      coverImage: "/placeholder.svg?height=400&width=300&text=Nurse",
+      coverImage: "/sneaky/forbidden_nurse_cover.png",
       previewImages: [
         "/placeholder.svg?height=400&width=300&text=Nurse1",
         "/placeholder.svg?height=400&width=300&text=Nurse2",
@@ -70,10 +70,14 @@ export default function SneakyPage() {
       isLimited: false,
       style: "Outdoor",
       intimacy: "Sexy",
-      coverImage: "/placeholder.svg?height=400&width=300&text=Swim",
+      coverImage: "/sneaky/midnight_swim_cover.png",
       previewImages: [
-        "/placeholder.svg?height=400&width=300&text=Swim1",
-        "/placeholder.svg?height=400&width=300&text=Swim2",
+        "/sneaky/pack_midnight_swim_1.png",
+        "/sneaky/pack_midnight_swim_2.png",
+        "/sneaky/pack_midnight_swim_3.png",
+        "/sneaky/pack_midnight_swim_4.png",
+        "/sneaky/pack_midnight_swim_5.png",
+        "/sneaky/pack_midnight_swim_6.png",
       ],
     },
     {
@@ -88,7 +92,7 @@ export default function SneakyPage() {
       limitedTime: "24h",
       style: "Bedroom",
       intimacy: "Soft",
-      coverImage: "/placeholder.svg?height=400&width=300&text=Morning",
+      coverImage: "/sneaky/morning_glow_cover.png",
       previewImages: [
         "/placeholder.svg?height=400&width=300&text=Morning1",
         "/placeholder.svg?height=400&width=300&text=Morning2",
@@ -106,7 +110,7 @@ export default function SneakyPage() {
       isNew: true,
       style: "Fantasy",
       intimacy: "VIP",
-      coverImage: "/placeholder.svg?height=400&width=300&text=Elf",
+      coverImage: "/sneaky/fantasy_elf_cover.png",
       previewImages: [
         "/placeholder.svg?height=400&width=300&text=Elf1",
         "/placeholder.svg?height=400&width=300&text=Elf2",
@@ -123,7 +127,7 @@ export default function SneakyPage() {
       isLimited: false,
       style: "Shower",
       intimacy: "NSFW",
-      coverImage: "/placeholder.svg?height=400&width=300&text=Shower",
+      coverImage: "/sneaky/shower_secrets_cover.png",
       previewImages: [
         "/placeholder.svg?height=400&width=300&text=Shower1",
         "/placeholder.svg?height=400&width=300&text=Shower2",
@@ -140,7 +144,7 @@ export default function SneakyPage() {
       isLimited: false,
       style: "Bedroom",
       intimacy: "Sexy",
-      coverImage: "/placeholder.svg?height=400&width=300&text=Bedroom",
+        coverImage: "/sneaky/bedroom_eyes_cover.png",
       previewImages: [
         "/placeholder.svg?height=400&width=300&text=Bedroom1",
         "/placeholder.svg?height=400&width=300&text=Bedroom2",
@@ -153,7 +157,7 @@ export default function SneakyPage() {
     {
       id: 101,
       title: "Midnight Swim #3",
-      image: "/placeholder.svg?height=400&width=300&text=Swim3",
+      image: "/sneaky/midnight_swim_cer.png",
       packName: "Midnight Swim",
       date: "2023-05-15",
     },
@@ -182,7 +186,7 @@ export default function SneakyPage() {
       images: 6,
       purchaseDate: "2023-04-15",
       lastUpdated: "2023-05-20",
-      coverImage: "/placeholder.svg?height=400&width=300&text=Swim",
+      coverImage: "/sneaky/midnight_s_cover.png",
     },
   ]
 
