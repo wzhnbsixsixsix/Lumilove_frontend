@@ -1,50 +1,56 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect, useRef } from "react"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { Dice5, Plus, Check, X, Upload, Download, Camera } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Sidebar from "@/components/sidebar"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Dice5, Plus, Check, X, Upload, Download, Camera } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Sidebar from "@/components/sidebar";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface Character {
-  id: string
-  name: string
-  imageSrc: string
-  gender: "male" | "female"
+  id: string;
+  name: string;
+  imageSrc: string;
+  gender: "male" | "female";
 }
 
 interface RecentChat {
-  id: string
-  name: string
-  imageSrc: string
-  gender: "male" | "female"
+  id: string;
+  name: string;
+  imageSrc: string;
+  gender: "male" | "female";
 }
 
 export default function CreatePage() {
-  const router = useRouter()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Character and selection states
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null)
-  const [selectedGender, setSelectedGender] = useState<"male" | "female">("male")
-  const [selectedStyle, setSelectedStyle] = useState<"realistic" | "anime">("realistic")
-  const [selectedScene, setSelectedScene] = useState<string | null>(null)
-  const [selectedClothing, setSelectedClothing] = useState<string | null>(null)
-  const [selectedPose, setSelectedPose] = useState<string | null>(null)
-  const [selectedAngle, setSelectedAngle] = useState<string | null>(null)
-  const [imageCount, setImageCount] = useState(1)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [generatedImages, setGeneratedImages] = useState<string[]>([])
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(
+    null
+  );
+  const [selectedGender, setSelectedGender] = useState<"male" | "female">(
+    "male"
+  );
+  const [selectedStyle, setSelectedStyle] = useState<"realistic" | "anime">(
+    "realistic"
+  );
+  const [selectedScene, setSelectedScene] = useState<string | null>(null);
+  const [selectedClothing, setSelectedClothing] = useState<string | null>(null);
+  const [selectedPose, setSelectedPose] = useState<string | null>(null);
+  const [selectedAngle, setSelectedAngle] = useState<string | null>(null);
+  const [imageCount, setImageCount] = useState(1);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   // Dialog states
-  const [openDialog, setOpenDialog] = useState<string | null>(null)
-  const [openUploadDialog, setOpenUploadDialog] = useState(false)
-  const [recentChats, setRecentChats] = useState<RecentChat[]>([])
+  const [openDialog, setOpenDialog] = useState<string | null>(null);
+  const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  const [recentChats, setRecentChats] = useState<RecentChat[]>([]);
 
   // Mock data - Recent chats
   useEffect(() => {
@@ -68,8 +74,8 @@ export default function CreatePage() {
         imageSrc: "/placeholder.svg?height=80&width=80&text=A",
         gender: "male",
       },
-    ])
-  }, [])
+    ]);
+  }, []);
 
   // Scene options with thumbnails
   const scenes = {
@@ -82,24 +88,28 @@ export default function CreatePage() {
     Elevator: "/placeholder.svg?height=100&width=100&text=Elevator",
     Office: "/placeholder.svg?height=100&width=100&text=Office",
     Classroom: "/placeholder.svg?height=100&width=100&text=Classroom",
-    "High-End Restaurant": "/placeholder.svg?height=100&width=100&text=Restaurant",
+    "High-End Restaurant":
+      "/placeholder.svg?height=100&width=100&text=Restaurant",
     Beach: "/placeholder.svg?height=100&width=100&text=Beach",
     Dungeon: "/placeholder.svg?height=100&width=100&text=Dungeon",
     Bar: "/placeholder.svg?height=100&width=100&text=Bar",
     Street: "/placeholder.svg?height=100&width=100&text=Street",
     "Five-Star Hotel": "/placeholder.svg?height=100&width=100&text=Hotel",
-  }
+  };
 
   // Gender-specific clothing options
   const clothing = {
     male: {
-      "Jeans And T-Shirt": "/placeholder.svg?height=100&width=100&text=Jeans+Tee",
+      "Jeans And T-Shirt":
+        "/placeholder.svg?height=100&width=100&text=Jeans+Tee",
       Suit: "/placeholder.svg?height=100&width=100&text=Suit",
       "Leather Jacket": "/placeholder.svg?height=100&width=100&text=Leather",
       "Sports Outfit": "/placeholder.svg?height=100&width=100&text=Sports",
-      "High-End Trench Coat": "/placeholder.svg?height=100&width=100&text=Trench+Coat",
+      "High-End Trench Coat":
+        "/placeholder.svg?height=100&width=100&text=Trench+Coat",
       Sweater: "/placeholder.svg?height=100&width=100&text=Sweater",
-      "Preppy Style Outfit": "/placeholder.svg?height=100&width=100&text=Preppy",
+      "Preppy Style Outfit":
+        "/placeholder.svg?height=100&width=100&text=Preppy",
       Bathrobe: "/placeholder.svg?height=100&width=100&text=Bathrobe",
       "Groom Suit": "/placeholder.svg?height=100&width=100&text=Groom",
     },
@@ -114,7 +124,7 @@ export default function CreatePage() {
       Bathrobe: "/placeholder.svg?height=100&width=100&text=Bathrobe",
       "Wedding Dress": "/placeholder.svg?height=100&width=100&text=Wedding",
     },
-  }
+  };
 
   // Pose options with images
   const poses = {
@@ -124,7 +134,7 @@ export default function CreatePage() {
     "Hands On Hip": "/placeholder.svg?height=100&width=100&text=Hands+Hip",
     Leaning: "/placeholder.svg?height=100&width=100&text=Leaning",
     "Turned Away": "/placeholder.svg?height=100&width=100&text=Turned",
-  }
+  };
 
   // Angle options with images
   const angles = {
@@ -133,84 +143,89 @@ export default function CreatePage() {
     "Front View": "/placeholder.svg?height=100&width=100&text=Front",
     "Side View": "/placeholder.svg?height=100&width=100&text=Side",
     "Back View": "/placeholder.svg?height=100&width=100&text=Back",
-  }
+  };
 
   const handleGenerate = () => {
     if (!selectedCharacter && !selectedGender && !uploadedImage) {
-      alert("Please select or upload a character")
-      return
+      alert("Please select or upload a character");
+      return;
     }
 
-    setIsGenerating(true)
+    setIsGenerating(true);
 
     // Simulate image generation
     setTimeout(() => {
       const mockGeneratedImages = Array(imageCount)
         .fill(0)
-        .map((_, i) => `/placeholder.svg?height=400&width=300&text=Generated-${i + 1}`)
-      setGeneratedImages(mockGeneratedImages)
-      setIsGenerating(false)
-    }, 3000)
-  }
+        .map(
+          (_, i) =>
+            `/placeholder.svg?height=400&width=300&text=Generated-${i + 1}`
+        );
+      setGeneratedImages(mockGeneratedImages);
+      setIsGenerating(false);
+    }, 3000);
+  };
 
   const handleRandom = () => {
-    const sceneKeys = Object.keys(scenes)
-    const clothingKeys = Object.keys(clothing[selectedGender])
-    const poseKeys = Object.keys(poses)
-    const angleKeys = Object.keys(angles)
+    const sceneKeys = Object.keys(scenes);
+    const clothingKeys = Object.keys(clothing[selectedGender]);
+    const poseKeys = Object.keys(poses);
+    const angleKeys = Object.keys(angles);
 
-    setSelectedScene(sceneKeys[Math.floor(Math.random() * sceneKeys.length)])
-    setSelectedClothing(clothingKeys[Math.floor(Math.random() * clothingKeys.length)])
-    setSelectedPose(poseKeys[Math.floor(Math.random() * poseKeys.length)])
-    setSelectedAngle(angleKeys[Math.floor(Math.random() * angleKeys.length)])
-  }
+    setSelectedScene(sceneKeys[Math.floor(Math.random() * sceneKeys.length)]);
+    setSelectedClothing(
+      clothingKeys[Math.floor(Math.random() * clothingKeys.length)]
+    );
+    setSelectedPose(poseKeys[Math.floor(Math.random() * poseKeys.length)]);
+    setSelectedAngle(angleKeys[Math.floor(Math.random() * angleKeys.length)]);
+  };
 
   const handleImageCountClick = (count: number) => {
-    setImageCount(count)
+    setImageCount(count);
     // Redirect to premium page for 4 or 9 images
     if (count > 1) {
-      router.push("/premium")
+      router.push("/premium");
     }
-  }
+  };
 
   const handleCharacterSelect = (id: string, gender: "male" | "female") => {
-    setSelectedCharacter(id)
-    setSelectedGender(gender)
-  }
+    setSelectedCharacter(id);
+    setSelectedGender(gender);
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
-          setUploadedImage(e.target.result as string)
+          setUploadedImage(e.target.result as string);
         }
-      }
-      reader.readAsDataURL(file)
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleUploadClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.click()
+      fileInputRef.current.click();
     }
-  }
+  };
 
   const handleUploadConfirm = () => {
-    setOpenUploadDialog(false)
-    setSelectedCharacter("custom")
-  }
+    setOpenUploadDialog(false);
+    setSelectedCharacter("custom");
+  };
 
   const handleDownloadImage = (imageUrl: string, index: number) => {
     // Create a temporary anchor element
-    const link = document.createElement("a")
-    link.href = imageUrl
-    link.download = `generated-image-${index + 1}.png`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+    const link = document.createElement("a");
+    link.href = imageUrl;
+    link.download = `generated-image-${index + 1}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="flex min-h-screen bg-[#1a0a24]">
@@ -221,7 +236,8 @@ export default function CreatePage() {
           {/* Character Selection Section */}
           <div className="bg-[#2a1a34] rounded-b-2xl p-8 mb-6">
             <h2 className="text-2xl font-semibold text-center mb-6 text-white">
-              Upload an Image or Select a Character <span className="text-pink-500">*</span>
+              Upload an Image or Select a Character{" "}
+              <span className="text-pink-500">*</span>
             </h2>
             <div className="flex items-center justify-center gap-6">
               {/* Enhanced Upload Button */}
@@ -241,9 +257,13 @@ export default function CreatePage() {
                 <div
                   key={character.id}
                   className={`w-28 h-28 rounded-lg overflow-hidden cursor-pointer relative ${
-                    selectedCharacter === character.id ? "ring-2 ring-pink-500" : ""
+                    selectedCharacter === character.id
+                      ? "ring-2 ring-pink-500"
+                      : ""
                   }`}
-                  onClick={() => handleCharacterSelect(character.id, character.gender)}
+                  onClick={() =>
+                    handleCharacterSelect(character.id, character.gender)
+                  }
                 >
                   <Image
                     src={character.imageSrc || "/placeholder.svg"}
@@ -258,7 +278,9 @@ export default function CreatePage() {
                     </div>
                   )}
                   <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 py-1 px-2">
-                    <p className="text-xs text-white text-center">{character.name}</p>
+                    <p className="text-xs text-white text-center">
+                      {character.name}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -273,7 +295,9 @@ export default function CreatePage() {
                 {/* Scene Selection */}
                 <div
                   className={`relative w-full aspect-square rounded-xl overflow-hidden cursor-pointer border-2 ${
-                    selectedScene ? "border-pink-500" : "border-[#3a1a44] border-dashed"
+                    selectedScene
+                      ? "border-pink-500"
+                      : "border-[#3a1a44] border-dashed"
                   }`}
                   onClick={() => setOpenDialog("scene")}
                 >
@@ -283,20 +307,25 @@ export default function CreatePage() {
                         <span className="text-white text-sm">🏠</span>
                       </div>
                       <Image
-                        src={scenes[selectedScene] || "/placeholder.svg"}
+                        src={
+                          scenes[selectedScene as keyof typeof scenes] ||
+                          "/placeholder.svg"
+                        }
                         alt={selectedScene}
                         fill
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                        <p className="text-white font-medium text-lg">{selectedScene}</p>
+                        <p className="text-white font-medium text-lg">
+                          {selectedScene}
+                        </p>
                       </div>
                       <div className="absolute top-3 right-3 bg-pink-500 rounded-full h-8 w-8 flex items-center justify-center">
                         <X
                           className="h-5 w-5 text-white"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedScene(null)
+                            e.stopPropagation();
+                            setSelectedScene(null);
                           }}
                         />
                       </div>
@@ -312,7 +341,9 @@ export default function CreatePage() {
                 {/* Pose Selection */}
                 <div
                   className={`relative w-full aspect-square rounded-xl overflow-hidden cursor-pointer border-2 ${
-                    selectedPose ? "border-pink-500" : "border-[#3a1a44] border-dashed"
+                    selectedPose
+                      ? "border-pink-500"
+                      : "border-[#3a1a44] border-dashed"
                   }`}
                   onClick={() => setOpenDialog("pose")}
                 >
@@ -322,20 +353,25 @@ export default function CreatePage() {
                         <span className="text-white text-sm">🧍</span>
                       </div>
                       <Image
-                        src={poses[selectedPose] || "/placeholder.svg"}
+                        src={
+                          poses[selectedPose as keyof typeof poses] ||
+                          "/placeholder.svg"
+                        }
                         alt={selectedPose}
                         fill
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                        <p className="text-white font-medium text-lg">{selectedPose}</p>
+                        <p className="text-white font-medium text-lg">
+                          {selectedPose}
+                        </p>
                       </div>
                       <div className="absolute top-3 right-3 bg-pink-500 rounded-full h-8 w-8 flex items-center justify-center">
                         <X
                           className="h-5 w-5 text-white"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedPose(null)
+                            e.stopPropagation();
+                            setSelectedPose(null);
                           }}
                         />
                       </div>
@@ -355,11 +391,18 @@ export default function CreatePage() {
                   <div>
                     <div
                       className={`grid ${
-                        imageCount === 1 ? "grid-cols-1" : imageCount === 4 ? "grid-cols-2" : "grid-cols-3"
+                        imageCount === 1
+                          ? "grid-cols-1"
+                          : imageCount === 4
+                          ? "grid-cols-2"
+                          : "grid-cols-3"
                       } gap-4`}
                     >
                       {generatedImages.map((image, index) => (
-                        <div key={index} className="aspect-[3/4] rounded-xl overflow-hidden relative group">
+                        <div
+                          key={index}
+                          className="aspect-[3/4] rounded-xl overflow-hidden relative group"
+                        >
                           <Image
                             src={image || "/placeholder.svg"}
                             alt={`Generated image ${index + 1}`}
@@ -382,7 +425,7 @@ export default function CreatePage() {
                       <Button
                         className="bg-pink-500 hover:bg-pink-600 text-white px-10 py-8 h-auto rounded-xl text-xl font-medium"
                         onClick={() => {
-                          setGeneratedImages([])
+                          setGeneratedImages([]);
                         }}
                       >
                         Generate New Images
@@ -400,16 +443,23 @@ export default function CreatePage() {
                     {isGenerating ? (
                       <div className="text-center z-10">
                         <div className="w-24 h-24 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                        <p className="text-gray-300 text-2xl font-medium">Generating your images...</p>
-                        <p className="text-sm text-gray-400 mt-3">This may take a few minutes</p>
+                        <p className="text-gray-300 text-2xl font-medium">
+                          Generating your images...
+                        </p>
+                        <p className="text-sm text-gray-400 mt-3">
+                          This may take a few minutes
+                        </p>
                       </div>
                     ) : (
                       <div className="text-center px-6 z-10">
                         <div className="mb-8">
                           <Camera className="h-20 w-20 text-pink-500 mx-auto mb-4" />
-                          <p className="text-2xl text-gray-300 mb-4 font-medium">Create Your Perfect Image</p>
+                          <p className="text-2xl text-gray-300 mb-4 font-medium">
+                            Create Your Perfect Image
+                          </p>
                           <p className="text-base text-gray-400 mb-8">
-                            Select preset elements on the sides and click "Generate"
+                            Select preset elements on the sides and click
+                            "Generate"
                           </p>
                         </div>
                         <Button
@@ -429,7 +479,9 @@ export default function CreatePage() {
                 {/* Clothing Selection */}
                 <div
                   className={`relative w-full aspect-square rounded-xl overflow-hidden cursor-pointer border-2 ${
-                    selectedClothing ? "border-pink-500" : "border-[#3a1a44] border-dashed"
+                    selectedClothing
+                      ? "border-pink-500"
+                      : "border-[#3a1a44] border-dashed"
                   }`}
                   onClick={() => setOpenDialog("clothing")}
                 >
@@ -439,20 +491,26 @@ export default function CreatePage() {
                         <span className="text-white text-sm">👕</span>
                       </div>
                       <Image
-                        src={clothing[selectedGender][selectedClothing] || "/placeholder.svg"}
+                        src={
+                          clothing[selectedGender][
+                            selectedClothing as keyof (typeof clothing)[typeof selectedGender]
+                          ] || "/placeholder.svg"
+                        }
                         alt={selectedClothing}
                         fill
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                        <p className="text-white font-medium text-lg">{selectedClothing}</p>
+                        <p className="text-white font-medium text-lg">
+                          {selectedClothing}
+                        </p>
                       </div>
                       <div className="absolute top-3 right-3 bg-pink-500 rounded-full h-8 w-8 flex items-center justify-center">
                         <X
                           className="h-5 w-5 text-white"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedClothing(null)
+                            e.stopPropagation();
+                            setSelectedClothing(null);
                           }}
                         />
                       </div>
@@ -460,7 +518,9 @@ export default function CreatePage() {
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <Plus className="h-12 w-12 text-gray-400 mb-3" />
-                      <p className="text-gray-400 text-lg font-medium">Clothing</p>
+                      <p className="text-gray-400 text-lg font-medium">
+                        Clothing
+                      </p>
                     </div>
                   )}
                 </div>
@@ -468,7 +528,9 @@ export default function CreatePage() {
                 {/* Angle Selection */}
                 <div
                   className={`relative w-full aspect-square rounded-xl overflow-hidden cursor-pointer border-2 ${
-                    selectedAngle ? "border-pink-500" : "border-[#3a1a44] border-dashed"
+                    selectedAngle
+                      ? "border-pink-500"
+                      : "border-[#3a1a44] border-dashed"
                   }`}
                   onClick={() => setOpenDialog("angle")}
                 >
@@ -478,20 +540,25 @@ export default function CreatePage() {
                         <span className="text-white text-sm">📐</span>
                       </div>
                       <Image
-                        src={angles[selectedAngle] || "/placeholder.svg"}
+                        src={
+                          angles[selectedAngle as keyof typeof angles] ||
+                          "/placeholder.svg"
+                        }
                         alt={selectedAngle}
                         fill
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                        <p className="text-white font-medium text-lg">{selectedAngle}</p>
+                        <p className="text-white font-medium text-lg">
+                          {selectedAngle}
+                        </p>
                       </div>
                       <div className="absolute top-3 right-3 bg-pink-500 rounded-full h-8 w-8 flex items-center justify-center">
                         <X
                           className="h-5 w-5 text-white"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedAngle(null)
+                            e.stopPropagation();
+                            setSelectedAngle(null);
                           }}
                         />
                       </div>
@@ -519,11 +586,15 @@ export default function CreatePage() {
 
               {/* Number of images */}
               <div className="bg-[#2a1a34] rounded-xl p-6">
-                <h3 className="text-lg font-medium mb-4 text-center text-white">Number of Images</h3>
+                <h3 className="text-lg font-medium mb-4 text-center text-white">
+                  Number of Images
+                </h3>
                 <div className="grid grid-cols-3 gap-4">
                   <button
                     className={`py-6 rounded-xl text-center text-lg ${
-                      imageCount === 1 ? "bg-pink-500 text-white" : "bg-[#3a1a44] text-gray-300 hover:bg-[#4a2a54]"
+                      imageCount === 1
+                        ? "bg-pink-500 text-white"
+                        : "bg-[#3a1a44] text-gray-300 hover:bg-[#4a2a54]"
                     }`}
                     onClick={() => setImageCount(1)}
                   >
@@ -531,7 +602,9 @@ export default function CreatePage() {
                   </button>
                   <button
                     className={`py-6 rounded-xl text-center text-lg relative ${
-                      imageCount === 4 ? "bg-pink-500 text-white" : "bg-[#3a1a44] text-gray-300 hover:bg-[#4a2a54]"
+                      imageCount === 4
+                        ? "bg-pink-500 text-white"
+                        : "bg-[#3a1a44] text-gray-300 hover:bg-[#4a2a54]"
                     }`}
                     onClick={() => handleImageCountClick(4)}
                   >
@@ -542,7 +615,9 @@ export default function CreatePage() {
                   </button>
                   <button
                     className={`py-6 rounded-xl text-center text-lg relative ${
-                      imageCount === 9 ? "bg-pink-500 text-white" : "bg-[#3a1a44] text-gray-300 hover:bg-[#4a2a54]"
+                      imageCount === 9
+                        ? "bg-pink-500 text-white"
+                        : "bg-[#3a1a44] text-gray-300 hover:bg-[#4a2a54]"
                     }`}
                     onClick={() => handleImageCountClick(9)}
                   >
@@ -559,7 +634,13 @@ export default function CreatePage() {
       </main>
 
       {/* Hidden file input */}
-      <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" className="hidden" />
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        accept="image/*"
+        className="hidden"
+      />
 
       {/* Upload Dialog */}
       <Dialog open={openUploadDialog} onOpenChange={setOpenUploadDialog}>
@@ -583,8 +664,12 @@ export default function CreatePage() {
                   <div className="bg-pink-500 rounded-full p-4 mb-3">
                     <Upload className="h-8 w-8 text-white" />
                   </div>
-                  <span className="text-base font-medium text-white">Upload an Image</span>
-                  <span className="text-xs text-gray-400 mt-1">Click to browse files</span>
+                  <span className="text-base font-medium text-white">
+                    Upload an Image
+                  </span>
+                  <span className="text-xs text-gray-400 mt-1">
+                    Click to browse files
+                  </span>
                 </div>
               )}
             </div>
@@ -602,31 +687,41 @@ export default function CreatePage() {
                 >
                   <div
                     className={`h-5 w-5 rounded-full border-2 ${
-                      selectedGender === "male" ? "border-blue-500 bg-blue-500" : "border-gray-400"
+                      selectedGender === "male"
+                        ? "border-blue-500 bg-blue-500"
+                        : "border-gray-400"
                     } mr-2`}
                   ></div>
                   <span className="text-white text-lg">Male</span>
                 </div>
                 <div
                   className={`flex items-center justify-center py-4 px-3 rounded-lg cursor-pointer ${
-                    selectedGender === "female" ? "bg-[#3a1a44]" : "bg-[#2a1a34]"
+                    selectedGender === "female"
+                      ? "bg-[#3a1a44]"
+                      : "bg-[#2a1a34]"
                   }`}
                   onClick={() => setSelectedGender("female")}
                 >
                   <div
                     className={`h-5 w-5 rounded-full border-2 ${
-                      selectedGender === "female" ? "border-pink-500 bg-pink-500" : "border-gray-400"
+                      selectedGender === "female"
+                        ? "border-pink-500 bg-pink-500"
+                        : "border-gray-400"
                     } mr-2`}
                   ></div>
                   <span className="text-white text-lg">Female</span>
                 </div>
               </div>
 
-              <p className="text-gray-400 text-sm mb-3">This influences the generated result.</p>
+              <p className="text-gray-400 text-sm mb-3">
+                This influences the generated result.
+              </p>
               <div className="grid grid-cols-2 gap-4">
                 <div
                   className={`relative rounded-lg overflow-hidden cursor-pointer border-2 ${
-                    selectedStyle === "realistic" ? "border-pink-500" : "border-transparent"
+                    selectedStyle === "realistic"
+                      ? "border-pink-500"
+                      : "border-transparent"
                   }`}
                   onClick={() => setSelectedStyle("realistic")}
                 >
@@ -638,7 +733,9 @@ export default function CreatePage() {
                     className="w-full h-[120px] object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 py-2">
-                    <p className="text-center text-white text-base">Realistic</p>
+                    <p className="text-center text-white text-base">
+                      Realistic
+                    </p>
                   </div>
                   {selectedStyle === "realistic" && (
                     <div className="absolute bottom-3 right-3 bg-pink-500 rounded-full h-6 w-6 flex items-center justify-center">
@@ -648,7 +745,9 @@ export default function CreatePage() {
                 </div>
                 <div
                   className={`relative rounded-lg overflow-hidden cursor-pointer border-2 ${
-                    selectedStyle === "anime" ? "border-pink-500" : "border-transparent"
+                    selectedStyle === "anime"
+                      ? "border-pink-500"
+                      : "border-transparent"
                   }`}
                   onClick={() => setSelectedStyle("anime")}
                 >
@@ -679,7 +778,10 @@ export default function CreatePage() {
               >
                 Cancel
               </Button>
-              <Button className="w-[48%] bg-pink-500 hover:bg-pink-600 py-3 text-base" onClick={handleUploadConfirm}>
+              <Button
+                className="w-[48%] bg-pink-500 hover:bg-pink-600 py-3 text-base"
+                onClick={handleUploadConfirm}
+              >
                 Confirm
               </Button>
             </div>
@@ -688,17 +790,20 @@ export default function CreatePage() {
       </Dialog>
 
       {/* Selection Dialogs */}
-      <Dialog open={!!openDialog} onOpenChange={(open) => !open && setOpenDialog(null)}>
+      <Dialog
+        open={!!openDialog}
+        onOpenChange={(open) => !open && setOpenDialog(null)}
+      >
         <DialogContent className="bg-[#1a0a24] border-[#3a1a44] max-w-3xl">
           <h2 className="text-xl font-semibold mb-4 text-white">
             Select{" "}
             {openDialog === "scene"
               ? "Scene"
               : openDialog === "clothing"
-                ? "Clothing"
-                : openDialog === "pose"
-                  ? "Pose"
-                  : "Angle"}
+              ? "Clothing"
+              : openDialog === "pose"
+              ? "Pose"
+              : "Angle"}
           </h2>
 
           {openDialog === "scene" && (
@@ -711,9 +816,16 @@ export default function CreatePage() {
                   }`}
                   onClick={() => setSelectedScene(name)}
                 >
-                  <Image src={imageSrc || "/placeholder.svg"} alt={name} fill className="object-cover" />
+                  <Image
+                    src={imageSrc || "/placeholder.svg"}
+                    alt={name}
+                    fill
+                    className="object-cover"
+                  />
                   <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                    <p className="text-white text-sm text-center px-1">{name}</p>
+                    <p className="text-white text-sm text-center px-1">
+                      {name}
+                    </p>
                   </div>
                   {selectedScene === name && (
                     <div className="absolute bottom-2 right-2 bg-pink-500 rounded-full h-6 w-6 flex items-center justify-center">
@@ -727,25 +839,34 @@ export default function CreatePage() {
 
           {openDialog === "clothing" && (
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
-              {Object.entries(clothing[selectedGender]).map(([name, imageSrc]) => (
-                <div
-                  key={name}
-                  className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer ${
-                    selectedClothing === name ? "ring-2 ring-pink-500" : ""
-                  }`}
-                  onClick={() => setSelectedClothing(name)}
-                >
-                  <Image src={imageSrc || "/placeholder.svg"} alt={name} fill className="object-cover" />
-                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                    <p className="text-white text-sm text-center px-1">{name}</p>
-                  </div>
-                  {selectedClothing === name && (
-                    <div className="absolute bottom-2 right-2 bg-pink-500 rounded-full h-6 w-6 flex items-center justify-center">
-                      <Check className="h-4 w-4 text-white" />
+              {Object.entries(clothing[selectedGender]).map(
+                ([name, imageSrc]) => (
+                  <div
+                    key={name}
+                    className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer ${
+                      selectedClothing === name ? "ring-2 ring-pink-500" : ""
+                    }`}
+                    onClick={() => setSelectedClothing(name)}
+                  >
+                    <Image
+                      src={imageSrc || "/placeholder.svg"}
+                      alt={name}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                      <p className="text-white text-sm text-center px-1">
+                        {name}
+                      </p>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {selectedClothing === name && (
+                      <div className="absolute bottom-2 right-2 bg-pink-500 rounded-full h-6 w-6 flex items-center justify-center">
+                        <Check className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+                  </div>
+                )
+              )}
             </div>
           )}
 
@@ -759,9 +880,16 @@ export default function CreatePage() {
                   }`}
                   onClick={() => setSelectedPose(name)}
                 >
-                  <Image src={imageSrc || "/placeholder.svg"} alt={name} fill className="object-cover" />
+                  <Image
+                    src={imageSrc || "/placeholder.svg"}
+                    alt={name}
+                    fill
+                    className="object-cover"
+                  />
                   <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                    <p className="text-white text-sm text-center px-1">{name}</p>
+                    <p className="text-white text-sm text-center px-1">
+                      {name}
+                    </p>
                   </div>
                   {selectedPose === name && (
                     <div className="absolute bottom-2 right-2 bg-pink-500 rounded-full h-6 w-6 flex items-center justify-center">
@@ -783,9 +911,16 @@ export default function CreatePage() {
                   }`}
                   onClick={() => setSelectedAngle(name)}
                 >
-                  <Image src={imageSrc || "/placeholder.svg"} alt={name} fill className="object-cover" />
+                  <Image
+                    src={imageSrc || "/placeholder.svg"}
+                    alt={name}
+                    fill
+                    className="object-cover"
+                  />
                   <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                    <p className="text-white text-sm text-center px-1">{name}</p>
+                    <p className="text-white text-sm text-center px-1">
+                      {name}
+                    </p>
                   </div>
                   {selectedAngle === name && (
                     <div className="absolute bottom-2 right-2 bg-pink-500 rounded-full h-6 w-6 flex items-center justify-center">
@@ -815,5 +950,5 @@ export default function CreatePage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
