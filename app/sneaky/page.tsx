@@ -72,7 +72,7 @@ export default function SneakyPage() {
       intimacy: "Sexy",
       coverImage: "/sneaky/heng02.jpg",
       previewImages: [
-        "/sneaky/pack_midnight_swim_1.png",
+        "/sneaky/heng0222.jpg",
         "/sneaky/pack_midnight_swim_2.png",
         "/sneaky/pack_midnight_swim_3.png",
         "/sneaky/pack_midnight_swim_4.png",
