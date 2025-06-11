@@ -77,7 +77,7 @@ export default function RegisterPage() {
       }
     } catch (error) {
       console.error("Registration error:", error)
-      setError(error.message || "注册失败，请检查后端服务器是否正常运行");
+      setError(error instanceof Error ? error.message : "注册失败，请检查后端服务器是否正常运行");
     } finally {
       setLoading(false)
     }
