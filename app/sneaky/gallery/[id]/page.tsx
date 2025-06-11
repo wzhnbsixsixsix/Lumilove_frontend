@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, X, Lock, Heart, Download, ChevronLeft, ChevronRight, Star } from "lucide-react"
@@ -8,14 +8,24 @@ import Sidebar from "@/components/sidebar"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 
-export default function GalleryPage({ params }: { params: { id: string } }) {
+export default function GalleryPage({ params }: { params: Promise<{ id: string }> }) {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [packId, setPackId] = useState<number | null>(null)
+
+  // 解析异步的 params
+  useEffect(() => {
+    params.then(resolvedParams => {
+      setPackId(Number.parseInt(resolvedParams.id))
+    })
+  }, [params])
+
+  // 如果 packId 还没有加载，显示 loading
+  if (packId === null) {
+    return <div>Loading...</div>
+  }
 
   // Mock data for the gallery
-  const packId = Number.parseInt(params.id)
-
-  // This would come from an API in a real app
   const pack = {
     id: packId,
     name: packId === 2 ? "Midnight Swim" : "Unknown Pack",
