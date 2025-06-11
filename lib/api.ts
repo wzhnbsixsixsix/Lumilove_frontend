@@ -1,3 +1,5 @@
+import { API_CONFIG } from './config';
+
 interface LoginResponse {
     accessToken: string;
   }
@@ -7,7 +9,7 @@ interface LoginResponse {
     // Add other response fields as needed
   }
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.239.244.183:8080/api';
+  const API_BASE_URL = `${API_CONFIG.BASE_URL}/api`;
   
   export async function login(email: string, password: string): Promise<string> {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
