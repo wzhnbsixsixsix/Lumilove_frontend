@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Heart } from "lucide-react"
+import { buildApiUrl, API_CONFIG } from "@/lib/config"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -38,7 +39,7 @@ export default function RegisterPage() {
       };
       console.log('Request body:', requestBody);
 
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.AUTH.REGISTER), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { buildApiUrl, API_CONFIG } from "@/lib/config"
 
 export default function EditProfilePage() {
   const router = useRouter()
@@ -104,7 +105,7 @@ export default function EditProfilePage() {
         return
       }
 
-      const response = await fetch('/api/users/profile', {
+      const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.USERS.PROFILE), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react"
+import { buildApiUrl, API_CONFIG } from "@/lib/config"
 
 interface User {
   username: string;
@@ -37,7 +38,7 @@ export default function Home() {
           const tokenValue = `Bearer ${token}`;
           console.log('Sending token:', tokenValue)
           
-          const response = await fetch('/api/auth/verify', {
+          const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.AUTH.VERIFY), {
             method: 'GET',
             headers: {
               'Authorization': tokenValue,
