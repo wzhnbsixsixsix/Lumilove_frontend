@@ -25,7 +25,7 @@ export default function GalleryPage({ params }: { params: Promise<{ id: string }
     return <div>Loading...</div>
   }
 
-  // Mock data for the gallery
+  // Mock data for the gallery(点进去放的地方)
   const pack = {
     id: packId,
     name: packId === 2 ? "Midnight Swim" : "Unknown Pack",
@@ -33,25 +33,25 @@ export default function GalleryPage({ params }: { params: Promise<{ id: string }
     images: [
       {
         id: 1,
-        src: "/sneaky/pack_midnight_swim_1.png",
+        src: "/sneaky/heng021.jpg",
         isLocked: false,
         isPremium: false,
       },
       {
         id: 2,
-        src: "/sneaky/pack_midnight_swim_2.png",
+        src: "/sneaky/heng022.jpg",
         isLocked: false,
         isPremium: false,
       },
       {
         id: 3,
-        src: "/sneaky/pack_midnight_swim_3.png",
+        src: "/sneaky/heng023.jpg",
         isLocked: false,
         isPremium: false,
       },
       {
         id: 4,
-        src: "/sneaky/pack_midnight_swim_4.png",
+        src: "/sneaky/heng024.jpg",
         isLocked: false,
         isPremium: true,
       },

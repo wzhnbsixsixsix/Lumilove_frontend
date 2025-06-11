@@ -52,7 +52,7 @@ export default function SneakyPage() {
       limitedTime: "48h",
       style: "Cosplay",
       intimacy: "NSFW",
-      coverImage: "/sneaky/forbidden_nurse_cover.png",
+      coverImage: "/sneaky/heng01.jpg",
       previewImages: [
         "/placeholder.svg?height=400&width=300&text=Nurse1",
         "/placeholder.svg?height=400&width=300&text=Nurse2",
@@ -70,7 +70,7 @@ export default function SneakyPage() {
       isLimited: false,
       style: "Outdoor",
       intimacy: "Sexy",
-      coverImage: "/sneaky/midnight_swim_cover.png",
+      coverImage: "/sneaky/heng02.jpg",
       previewImages: [
         "/sneaky/pack_midnight_swim_1.png",
         "/sneaky/pack_midnight_swim_2.png",
@@ -92,7 +92,7 @@ export default function SneakyPage() {
       limitedTime: "24h",
       style: "Bedroom",
       intimacy: "Soft",
-      coverImage: "/sneaky/morning_glow_cover.png",
+      coverImage: "/sneaky/heng03.jpg",
       previewImages: [
         "/placeholder.svg?height=400&width=300&text=Morning1",
         "/placeholder.svg?height=400&width=300&text=Morning2",
@@ -110,7 +110,7 @@ export default function SneakyPage() {
       isNew: true,
       style: "Fantasy",
       intimacy: "VIP",
-      coverImage: "/sneaky/fantasy_elf_cover.png",
+      coverImage: "/sneaky/heng04.jpg",
       previewImages: [
         "/placeholder.svg?height=400&width=300&text=Elf1",
         "/placeholder.svg?height=400&width=300&text=Elf2",
@@ -127,7 +127,7 @@ export default function SneakyPage() {
       isLimited: false,
       style: "Shower",
       intimacy: "NSFW",
-      coverImage: "/sneaky/shower_secrets_cover.png",
+      coverImage: "/sneaky/heng05.jpg",
       previewImages: [
         "/placeholder.svg?height=400&width=300&text=Shower1",
         "/placeholder.svg?height=400&width=300&text=Shower2",
@@ -144,7 +144,7 @@ export default function SneakyPage() {
       isLimited: false,
       style: "Bedroom",
       intimacy: "Sexy",
-        coverImage: "/sneaky/bedroom_eyes_cover.png",
+      coverImage: "/sneaky/heng06.jpg",
       previewImages: [
         "/placeholder.svg?height=400&width=300&text=Bedroom1",
         "/placeholder.svg?height=400&width=300&text=Bedroom2",
