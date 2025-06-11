@@ -6,9 +6,11 @@ interface LoginResponse {
     message: string;
     // Add other response fields as needed
   }
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.239.244.183:8080/api';
   
   export async function login(email: string, password: string): Promise<string> {
-    const response = await fetch('http://localhost:8080/api/auth/login', {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,7 +27,7 @@ interface LoginResponse {
   }
   
   export async function sendChatMessage(accessToken: string, message: string, chatId: string): Promise<ChatResponse> {
-    const response = await fetch('http://localhost:8080/api/chat', {
+    const response = await fetch(`${API_BASE_URL}/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

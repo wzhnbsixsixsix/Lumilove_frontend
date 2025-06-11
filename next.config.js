@@ -4,15 +4,15 @@ const nextConfig = {
     return [
       {
         source: '/api/users/:path*',
-        destination: 'http://localhost:8080/api/users/:path*',
+        destination: 'http://13.239.244.183:8080/api/users/:path*',
       },
       {
         source: '/api/auth/:path*',
-        destination: 'http://localhost:8080/api/auth/:path*',
+        destination: 'http://13.239.244.183:8080/api/auth/:path*',
       },
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8080/api/:path*',
+        destination: 'http://13.239.244.183:8080/api/:path*',
       },
     ]
   }
