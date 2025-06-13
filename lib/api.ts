@@ -28,7 +28,12 @@ interface LoginResponse {
     return data.accessToken;
   }
   
-  export async function sendChatMessage(accessToken: string, message: string, chatId: string): Promise<ChatResponse> {
+  export async function sendChatMessage(
+    accessToken: string, 
+    message: string, 
+    chatId: string,
+    characterId: number
+  ): Promise<ChatResponse> {
     const response = await fetch(`${API_BASE_URL}/chat`, {
       method: 'POST',
       headers: {
@@ -38,6 +43,7 @@ interface LoginResponse {
         'X-Title': 'Lumilove',
       },
       body: JSON.stringify({
+        characterId,
         message,
         chatId,
       }),
@@ -51,13 +57,14 @@ interface LoginResponse {
   }
 
   export async function sendChatMessageStream(
-  accessToken: string, 
-  message: string, 
-  chatId: string,
-  onChunk: (content: string) => void,
-  onComplete: () => void,
-  onError: (error: string) => void
-): Promise<() => void> {
+    accessToken: string, 
+    message: string, 
+    chatId: string,
+    characterId: number,
+    onChunk: (content: string) => void,
+    onComplete: () => void,
+    onError: (error: string) => void
+  ): Promise<() => void> {
     const controller = new AbortController();
     
     try {
@@ -70,6 +77,7 @@ interface LoginResponse {
           'X-Title': 'Lumilove',
         },
         body: JSON.stringify({
+          characterId,
           message,
           chatId,
         }),

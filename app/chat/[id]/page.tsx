@@ -357,6 +357,9 @@ const handleQuickReply = (reply: string) => {
     const messageText = inputValue.trim();
     setInputValue("");
     
+    // 获取当前角色的ID
+    const characterId = character.id;  // 添加这行
+    
     // 添加用户消息
     const userMessage: Message = {
       id: Date.now(),
@@ -387,6 +390,7 @@ const handleQuickReply = (reply: string) => {
         token,
         messageText,
         chatId,
+        characterId,  // 添加这个参数
         (content: string) => {
           accumulatedContent += content;
           // 使用函数式更新确保获取最新状态
