@@ -1126,6 +1126,12 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
                   <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                </div>
+                <span className="text-sm">AI is responding...</span>
+              </div>
+            )}
+
             <div className="relative">
               <textarea
                 value={inputValue}
@@ -1134,6 +1140,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                 placeholder={`Message ${character.name}...`}
                 className="w-full p-4 pr-28 bg-[#1a0a24] border border-[#3a1a44] rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-400 resize-none text-base"
                 rows={1}
+                disabled={isLoading} // 加载时禁用输入
               />
               <div className="absolute right-3 bottom-3 flex items-center space-x-2">
                 <button
@@ -1167,23 +1174,32 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                   <Mic className="h-6 w-6" />
                 </button>
                 <button
-                  className="p-2 rounded-full bg-pink-500 hover:bg-pink-600 text-white"
+                  className={`p-2 rounded-full ${
+                    isLoading 
+                      ? "bg-gray-500 cursor-not-allowed" 
+                      : "bg-pink-500 hover:bg-pink-600"
+                  } text-white`}
                   onClick={handleSendMessage}
+                  disabled={isLoading} // 加载时禁用发送按钮
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="m22 2-7 20-4-9-9-4Z" />
-                    <path d="M22 2 11 13" />
-                  </svg>
+                  {isLoading ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m22 2-7 20-4-9-9-4Z" />
+                      <path d="M22 2 11 13" />
+                    </svg>
+                  )}
                 </button>
               </div>
             </div>
