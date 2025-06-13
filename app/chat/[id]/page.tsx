@@ -53,6 +53,7 @@ interface Message {
   audioDuration?: number;
   hasImage?: boolean;
   imageSrc?: string;
+  isThinking?: boolean; // 新增：标识是否正在思考
 }
 
 export default function ChatPage() {
@@ -364,13 +365,14 @@ const handleQuickReply = (reply: string) => {
       timestamp: new Date().toISOString(),
     };
     
-    // 创建AI消息占位
+    // 创建AI消息占位（显示思考状态）
     const aiMessageId = Date.now() + 1;
     const aiMessage: Message = {
       id: aiMessageId,
       sender: "ai",
       text: "",
       timestamp: new Date().toISOString(),
+      isThinking: true, // 初始状态为思考中
     };
     
     // 使用函数式更新确保状态更新正确
@@ -379,6 +381,7 @@ const handleQuickReply = (reply: string) => {
     
     try {
       let accumulatedContent = "";
+      let isFirstChunk = true;
       
       await sendChatMessageStream(
         token,
@@ -390,19 +393,40 @@ const handleQuickReply = (reply: string) => {
           setMessages(prev => 
             prev.map(msg => 
               msg.id === aiMessageId 
-                ? { ...msg, text: accumulatedContent }
+                ? { 
+                    ...msg, 
+                    text: accumulatedContent,
+                    isThinking: false // 收到第一个内容后停止思考状态
+                  }
                 : msg
             )
           );
+          
+          // 第一次收到内容时，移除思考状态
+          if (isFirstChunk) {
+            isFirstChunk = false;
+          }
         },
         () => {
+          // 完成时确保移除思考状态
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === aiMessageId 
+                ? { ...msg, isThinking: false }
+                : msg
+            )
+          );
           setIsLoading(false);
         },
         (error: string) => {
           setMessages(prev => 
             prev.map(msg => 
               msg.id === aiMessageId 
-                ? { ...msg, text: `错误: ${error}` }
+                ? { 
+                    ...msg, 
+                    text: `错误: ${error}`,
+                    isThinking: false 
+                  }
                 : msg
             )
           );
@@ -414,7 +438,11 @@ const handleQuickReply = (reply: string) => {
       setMessages(prev => 
         prev.map(msg => 
           msg.id === aiMessageId 
-            ? { ...msg, text: "抱歉，发送消息时出现了错误。请稍后再试。" }
+            ? { 
+                ...msg, 
+                text: "抱歉，发送消息时出现了错误。请稍后再试。",
+                isThinking: false 
+              }
             : msg
         )
       );
@@ -972,29 +1000,47 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                       <span>{message.audioDuration}s</span>
                     </div>
                   )}
-                  {message.sender === "ai" && (
-                    <div className="text-base italic text-gray-300 mb-2">
-                      {message.text.split('"')[0]}
+                  
+                  {/* 思考状态显示 */}
+                  {message.sender === "ai" && message.isThinking && (
+                    <div className="flex items-center space-x-2 text-gray-400">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      </div>
+                      <span className="text-sm italic">Thinking...</span>
                     </div>
                   )}
-                  <p className="text-base">
-                    {message.sender === "ai"
-                      ? message.text.split('"').slice(1).join('"')
-                      : message.text}
-                  </p>
-                  {message.sender === "ai" && message.hasImage && (
-                    <div className="mt-3 rounded-lg overflow-hidden">
-                      <Image
-                        src={
-                          message.imageSrc ||
-                          "/placeholder.svg?height=300&width=200"
-                        }
-                        alt="AI generated image"
-                        width={300}
-                        height={200}
-                        className="object-cover"
-                      />
-                    </div>
+                  
+                  {/* 正常消息内容 */}
+                  {!message.isThinking && (
+                    <>
+                      {message.sender === "ai" && (
+                        <div className="text-base italic text-gray-300 mb-2">
+                          {message.text.split('"')[0]}
+                        </div>
+                      )}
+                      <p className="text-base">
+                        {message.sender === "ai"
+                          ? message.text.split('"').slice(1).join('"')
+                          : message.text}
+                      </p>
+                      {message.sender === "ai" && message.hasImage && (
+                        <div className="mt-3 rounded-lg overflow-hidden">
+                          <Image
+                            src={
+                              message.imageSrc ||
+                              "/placeholder.svg?height=300&width=200"
+                            }
+                            alt="AI generated image"
+                            width={300}
+                            height={200}
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -1074,6 +1120,12 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
 
           {/* Input area */}
           <div className="p-4 border-t border-[#3a1a44]">
+            {/* 加载状态提示 */}
+            {isLoading && (
+              <div className="mb-3 flex items-center justify-center space-x-2 text-gray-400">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
             <div className="relative">
               <textarea
                 value={inputValue}
