@@ -32,7 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { login, sendChatMessage } from "@/lib/api";
+import { login, sendChatMessage, sendChatMessageStream } from "@/lib/api";
 
 import Sidebar from "@/components/sidebar";
 import {
@@ -351,64 +351,73 @@ const handleQuickReply = (reply: string) => {
 
   // 2. 同时，修改 handleSendMessage，移除那个重复检查的逻辑
   const handleSendMessage = async () => {
-    console.log("=== handleSendMessage 调用 ===");
-    console.log("输入值:", inputValue);
+    if (!inputValue.trim() || !token) return;
     
-    if (!inputValue.trim() || !token) {
-      console.log("❌ 无法发送: 缺少输入或token");
-      return;
-    }
-
-    // 🔧 修复：先保存输入值，然后立即清空输入框并添加用户消息
     const messageText = inputValue.trim();
-    setInputValue(""); // 立即清空输入框
+    setInputValue("");
     
-    // 🔧 修复：立即添加用户消息到聊天记录
+    // 添加用户消息
     const userMessage: Message = {
-          id: Date.now(),
-          sender: "user",
+      id: Date.now(),
+      sender: "user",
       text: messageText,
-          timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString(),
     };
     
-    setMessages((prev) => [...prev, userMessage]);
-    console.log("✅ 用户消息已立即添加");
-
-    console.log("⚠️ 准备调用AI接口...");
+    // 创建AI消息占位
+    const aiMessageId = Date.now() + 1;
+    const aiMessage: Message = {
+      id: aiMessageId,
+      sender: "ai",
+      text: "",
+      timestamp: new Date().toISOString(),
+    };
+    
+    // 使用函数式更新确保状态更新正确
+    setMessages(prev => [...prev, userMessage, aiMessage]);
     setIsLoading(true);
     
     try {
-      console.log("Sending message to API...");
-      const response = await sendChatMessage(token, messageText, chatId);
-      console.log("API response:", response);
-
-      // 🔧 修复：只添加AI的响应消息（用户消息已经添加过了）
-      const aiMessage: Message = {
-        id: Date.now() + 1,
-        sender: "ai",
-        text: response.message,
-        timestamp: new Date().toISOString(),
-        audioDuration: 0,
-        hasImage: false,
-      };
+      let accumulatedContent = "";
       
-      setMessages((prev) => [...prev, aiMessage]);
-      console.log("✅ AI响应已添加");
-      
+      await sendChatMessageStream(
+        token,
+        messageText,
+        chatId,
+        (content: string) => {
+          accumulatedContent += content;
+          // 使用函数式更新确保获取最新状态
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === aiMessageId 
+                ? { ...msg, text: accumulatedContent }
+                : msg
+            )
+          );
+        },
+        () => {
+          setIsLoading(false);
+        },
+        (error: string) => {
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === aiMessageId 
+                ? { ...msg, text: `错误: ${error}` }
+                : msg
+            )
+          );
+          setIsLoading(false);
+        }
+      );
     } catch (error) {
-      console.error("Failed to send message:", error);
-      // 🔧 错误处理：如果API调用失败，可以选择显示错误消息或移除用户消息
-      // 这里我们保留用户消息，但可以添加一个错误提示
-      const errorMessage: Message = {
-        id: Date.now() + 2,
-        sender: "ai",
-        text: "抱歉，发送消息时出现了错误。请稍后再试。",
-        timestamp: new Date().toISOString(),
-        audioDuration: 0,
-        hasImage: false,
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
+      console.error("流式处理失败:", error);
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === aiMessageId 
+            ? { ...msg, text: "抱歉，发送消息时出现了错误。请稍后再试。" }
+            : msg
+        )
+      );
       setIsLoading(false);
     }
   };

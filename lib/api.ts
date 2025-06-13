@@ -49,3 +49,86 @@ interface LoginResponse {
   
     return response.json();
   }
+
+  export async function sendChatMessageStream(
+  accessToken: string, 
+  message: string, 
+  chatId: string,
+  onChunk: (content: string) => void,
+  onComplete: () => void,
+  onError: (error: string) => void
+): Promise<() => void> {
+    const controller = new AbortController();
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          message,
+          chatId,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error('流式请求失败');
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('无法读取响应流');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+
+          while (true) {
+            const lineEnd = buffer.indexOf('\n');
+            if (lineEnd === -1) break;
+
+            const line = buffer.slice(0, lineEnd).trim();
+            buffer = buffer.slice(lineEnd + 1);
+
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') {
+                onComplete();
+                return () => controller.abort();
+              }
+
+              try {
+                const parsed = JSON.parse(data);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  onChunk(content);
+                }
+              } catch (e) {
+                console.warn('解析流式数据失败:', data);
+              }
+            }
+          }
+        }
+        onComplete();
+      } finally {
+        reader.cancel();
+      }
+    } catch (error) {
+      const err = error as Error;
+      if (err.name !== 'AbortError') {
+        onError(err.message || '流式请求出错');
+      }
+    }
+    
+    return () => controller.abort();
+  }
