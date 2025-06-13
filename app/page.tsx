@@ -18,6 +18,107 @@ interface User {
   avatar?: string;
 }
 
+// 标签映射表
+const maleTagMap: Record<string, string> = {
+  "Alpha": "🔥 Dominant",
+  "Mature": "🔥 Dominant",
+  "Gentle": "💪 Muscle",
+  "Playful": "👦 MalePOV",
+  "Adventurous": "👦 MalePOV",
+  "Witty": "👦 MalePOV",
+  "Badboy": "💪 Muscle",
+  "Billionaire": "💪 Muscle",
+  "Cold Exterior": "🩸 Sadistic",
+  "Mysterious": "🩸 Sadistic",
+  "Anti-Hero": "🩸 Sadistic",
+  "Protective": "👶 CNC",
+  "Werewolf": "👹 Monster",
+  "Musician": "🧬 Breeding",
+  "Chef": "🧑‍🦰 Age Play",
+  "Police Officer": "🛏️ Step Roleplay",
+  "Mafia": "👹 Monster",
+  "Doctor": "🧠 Mind Break",
+  "Businessman": "🍭 Oral",
+  "Swimmer": "🍑 Anal",
+  "Boss": "🧑‍🤝‍🧑 Switch",
+}
+  
+const femaleTagMap: Record<string, string> = {
+  "Girl-Next-Door": "👧 FemalePOV",
+  "Innocent": "👧 FemalePOV",
+  "Elegant": "🌑 Yandere",
+  "Independent": "🙇 Submissive",
+  "Smart": "👩‍⚕️ Nurse",
+  "Caring": "🎒 Schoolgirl",
+  "Brave": "💼 Secretary",
+  "Nurturing": "👠 MILF",
+  "Teacher": "👩‍🦳 Mommy Dom",
+  "Nurse": "🚿 Shower",
+  "Cheerleader": "💧 Wet Scene",
+  "Lawyer": "🧸 Age Regression",
+  "Seductive": "🤫 Cheating",
+  "Playful": "😈 Villainess",
+  "Artist": "💃 Femme Fatale",
+  "Dancer": "🍑 Anal Play",
+  "Housewife": "👋 Spanking",
+  "Fashion Designer": "🏁 Edging",
+  "Doctor": "🙏 Begging",
+  "Entrepreneur": "📺 AI Assistant",
+  "Student": "🟪 Programmed",
+  "Mysterious": "🌑 Yandere",
+}
+
+// 过滤标签数组
+const maleFilterTags = [
+  "For You",
+  "Popular",
+  "🔥 Dominant",
+  "👦 MalePOV",
+  "💪 Muscle",
+  "🩸 Sadistic",
+  "👶 CNC",
+  "🧬 Breeding",
+  "🧑‍🦰 Age Play",
+  "🛏️ Step Roleplay",
+  "👹 Monster",
+  "🧠 Mind Break",
+  "🦶 Feet",
+  "🍭 Oral",
+  "🍑 Anal",
+  "🧑‍🤝‍🧑 Switch",
+]
+
+const femaleFilterTags = [
+  "For You",
+  "Popular",
+  "👧 FemalePOV",
+  "🌑 Yandere",
+  "🙇 Submissive",
+  "👩‍⚕️ Nurse",
+  "🎒 Schoolgirl",
+  "💼 Secretary",
+  "👠 MILF",
+  "👩‍🦳 Mommy Dom",
+  "🚿 Shower",
+  "💧 Wet Scene",
+  "🧸 Age Regression",
+  "🤫 Cheating",
+  "😈 Villainess",
+  "💃 Femme Fatale",
+  "🍑 Anal Play",
+  "👋 Spanking",
+  "🏁 Edging",
+  "🙏 Begging",
+  "📺 AI Assistant",
+  "🟪 Programmed",
+]
+
+// 标签映射函数
+const mapTags = (tags: string[], gender: 'guys' | 'girls'): string[] => {
+  const tagMap = gender === 'guys' ? maleTagMap : femaleTagMap
+  return tags.map(tag => tagMap[tag] || tag)
+}
+
 export default function Home() {
   const [activeGender, setActiveGender] = useState<"guys" | "girls">("guys")
   const [activeTag, setActiveTag] = useState("For You")
@@ -100,6 +201,7 @@ export default function Home() {
       description: "The successful CEO who knows what he wants. Will you be his next conquest?",
       chatCount: "1.4M",
       imageSrc: "/alexander_pic1.png",
+      creator: { id: "alexmaster", name: "AlexMaster", likeCount: "13.0K" },
     },
     {
       id: 2,
@@ -109,6 +211,7 @@ export default function Home() {
       description: "The handsome plumber with a playful side. He's ready to fix more than just your pipes.",
       chatCount: "3.9K",
       imageSrc: "/male/male_02.png",
+      creator: { id: "nightstalker", name: "NightStalker", likeCount: "9.5K" },
     },
     {
       id: 3,
@@ -119,6 +222,7 @@ export default function Home() {
         "The talented swimmer who dominates the competition. But you're the only one who knows about your secret romance.",
       chatCount: "1.7K",
       imageSrc: "/male/male_03.png",
+      creator: { id: "roadrebel", name: "RoadRebel", likeCount: "7.6K" },
     },
     {
       id: 13,
@@ -128,6 +232,7 @@ export default function Home() {
       description: "A dangerous man with a soft spot for you. He rules the underworld, but you rule his heart.",
       chatCount: "45.2K",
       imageSrc: "/male/male_04.png",
+      creator: { id: "alexmaster", name: "AlexMaster", likeCount: "13.0K" },
     },
     {
       id: 14,
@@ -137,6 +242,7 @@ export default function Home() {
       description: "A brilliant surgeon who saves lives. His gentle touch heals more than just physical wounds.",
       chatCount: "28.7K",
       imageSrc: "/male/male_05.png",
+      creator: { id: "nightstalker", name: "NightStalker", likeCount: "9.5K" },
     },
     {
       id: 15,
@@ -146,6 +252,7 @@ export default function Home() {
       description: "A rockstar whose music speaks to your soul. Every song he writes is inspired by you.",
       chatCount: "33.1K",
       imageSrc: "/male/male_06.png",
+      creator: { id: "roadrebel", name: "RoadRebel", likeCount: "7.6K" },
     },
     {
       id: 16,
@@ -155,6 +262,7 @@ export default function Home() {
       description: "A dedicated cop who breaks all his own rules for you. He'll protect you from anything, even himself.",
       chatCount: "19.8K",
       imageSrc: "/male/male_7.png.png",
+      creator: { id: "alexmaster", name: "AlexMaster", likeCount: "13.0K" },
     },
     {
       id: 17,
@@ -164,6 +272,7 @@ export default function Home() {
       description: "A talented chef who cooks with passion. He knows the way to your heart is through your stomach.",
       chatCount: "22.4K",
       imageSrc: "/male/male_8.png.png",
+      creator: { id: "nightstalker", name: "NightStalker", likeCount: "9.5K" },
     },
     {
       id: 18,
@@ -173,6 +282,7 @@ export default function Home() {
       description: "A tech mogul with a cold exterior but a burning desire for you. Money can't buy what he truly wants.",
       chatCount: "41.6K",
       imageSrc: "/male/male_9.png.png",
+      creator: { id: "roadrebel", name: "RoadRebel", likeCount: "7.6K" },
     },
   ]
 
@@ -187,6 +297,7 @@ export default function Home() {
         "A fierce and flirty entrepreneur, Rhonda sees you as her perfect partner in both business and pleasure.",
       chatCount: "22.2K",
       imageSrc: "/female/female01.png",
+      creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
     },
     {
       id: 5,
@@ -196,6 +307,7 @@ export default function Home() {
       description: "A shy and repressed girl, hiding her deep attraction to you while trying to fit in.",
       chatCount: "24.1K",
       imageSrc: "/female/female_02.png",
+      creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
     },
     {
       id: 6,
@@ -205,6 +317,7 @@ export default function Home() {
       description: "A reserved mother with a hidden perverted side, she will do anything to satisfy your desires.",
       chatCount: "7.0K",
       imageSrc: "/female/female_03.jpg",
+      creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
     },
     {
       id: 7,
@@ -214,6 +327,7 @@ export default function Home() {
       description: "A brilliant fashion designer with an eye for perfection. She knows what she wants and isn't afraid to take it.",
       chatCount: "18.3K",
       imageSrc: "/female/female_04.png",
+      creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
     },
     {
       id: 8,
@@ -223,6 +337,7 @@ export default function Home() {
       description: "A dedicated doctor who saves lives by day and has a secret wild side that only you get to discover.",
       chatCount: "31.7K",
       imageSrc: "/female/female_05.png",
+      creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
     },
     {
       id: 9,
@@ -232,6 +347,7 @@ export default function Home() {
       description: "A free-spirited artist who paints with passion. Her creativity extends beyond the canvas into every aspect of her life.",
       chatCount: "12.5K",
       imageSrc: "/female/female_06.png",
+      creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
     },
     {
       id: 10,
@@ -241,6 +357,7 @@ export default function Home() {
       description: "A powerful attorney who never loses a case. She's used to being in control, but will you be the exception?",
       chatCount: "27.9K",
       imageSrc: "/female/female_07.png",
+      creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
     },
     {
       id: 11,
@@ -250,6 +367,7 @@ export default function Home() {
       description: "A sweet kindergarten teacher with a hidden naughty side. She's always ready to teach you new things.",
       chatCount: "15.8K",
       imageSrc: "/female/female_08.png",
+      creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
     },
     {
       id: 12,
@@ -259,13 +377,20 @@ export default function Home() {
       description: "A professional ballet dancer whose moves are as mesmerizing off the stage as they are on. Every gesture tells a story.",
       chatCount: "20.4K",
       imageSrc: "/female/female_09.png",
+      creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
     },
   ]
 
   // Filter characters based on active gender and tag
   const characters = activeGender === "guys" ? maleCharacters : femaleCharacters
-  const filteredCharacters =
-    activeTag === "For You" ? characters : characters.filter((char) => char.tags.includes(activeTag)) 
+  const mappedCharacters = characters.map(char => ({
+    ...char,
+    tags: mapTags(char.tags, activeGender)
+  }))
+  
+  const filteredCharacters = activeTag === "For You" || activeTag === "Popular" 
+    ? mappedCharacters 
+    : mappedCharacters.filter((char) => char.tags.includes(activeTag))
 
   // Mock data for trending characters
   //trending的图片就放这里
@@ -290,43 +415,6 @@ export default function Home() {
     },
     { id: 7, name: "Aynaz", occupation: "Artist", rank: 4, imageSrc: "/avatar/female_01_avatar.png" },
     { id: 8, name: "Joyce", occupation: "Teacher", rank: 5, imageSrc: "/avatar/female_02_avatar.png" },
-  ]
-
-  // Filter tags
-  const maleFilterTags = [
-    "For You",
-    "Popular",
-    "Alpha",
-    "Mysterious",
-    "Adventurous",
-    "Anti-Hero",
-    "Mafia",
-    "Cold Exterior",
-    "Witty",
-    "Werewolf",
-    "Billionaire",
-    "Badboy",
-    "Mature",
-    "Gentle",
-  ]
-
-  const femaleFilterTags = [
-    "For You",
-    "Popular",
-    "Mysterious",
-    "Girl-Next-Door",
-    "Independent",
-    "Playful",
-    "Smart",
-    "Caring",
-    "Brave",
-    "Elegant",
-    "Nurturing",
-    "Teacher",
-    "Nurse",
-    "Cheerleader",
-    "Lawyer",
-    "Seductive",
   ]
 
   // Mock data for recent chats (only shown if there are any)
@@ -473,10 +561,10 @@ export default function Home() {
           >
             <TabsList className="bg-[#1a0a24] p-1 rounded-full w-fit">
               <TabsTrigger value="girls" className="rounded-full px-8 py-2.5 text-base data-[state=active]:bg-pink-500">
-                👧 Girls
+                👩 Female
               </TabsTrigger>
               <TabsTrigger value="guys" className="rounded-full px-8 py-2.5 text-base data-[state=active]:bg-pink-500">
-                👦 Guys
+                🧑‍🦱 Male
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -484,7 +572,7 @@ export default function Home() {
           {/* Filter Tags */}
           <div className="flex overflow-x-auto pb-4 mb-6 scrollbar-hide">
             <div className="flex space-x-3">
-              {(activeGender === "guys" ? maleFilterTags : femaleFilterTags).map((tag, index) => (
+              {(activeGender === "guys" ? maleFilterTags : femaleFilterTags).map((tag: string, index: number) => (
                 <Badge
                   key={index}
                   variant={tag === activeTag ? "default" : "outline"}
