@@ -66,6 +66,8 @@ interface LoginResponse {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
+          'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
+          'X-Title': 'Lumilove',
         },
         body: JSON.stringify({
           message,
