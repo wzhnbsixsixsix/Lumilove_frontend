@@ -842,51 +842,6 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
     };
   }, []);
 
-  // 加载聊天历史记录
-  useEffect(() => {
-    const loadChatHistory = async () => {
-      if (!token || !chatId) return;
-      
-      setIsLoadingHistory(true);
-      try {
-        const historyResponse = await getChatHistory(token, parseInt(chatId));
-        
-        if (historyResponse && historyResponse.length > 0) {
-          // 将历史记录转换为消息格式
-          const historyMessages: Message[] = [];
-          
-          historyResponse.forEach((item, index) => {
-            // 添加用户消息
-            historyMessages.push({
-              id: index * 2 + 1000, // 避免ID冲突
-              sender: "user",
-              text: item.message,
-              timestamp: item.createdAt,
-            });
-            
-            // 添加AI回复
-            historyMessages.push({
-              id: index * 2 + 1001,
-              sender: "ai", 
-              text: item.response,
-              timestamp: item.createdAt,
-            });
-          });
-          
-          // 合并历史记录和当前消息
-          setMessages(prev => [...historyMessages, ...prev]);
-          console.log(`Loaded ${historyResponse.length} history items`);
-        }
-      } catch (error) {
-        console.error('Failed to load chat history:', error);
-      } finally {
-        setIsLoadingHistory(false);
-      }
-    };
-
-    loadChatHistory();
-  }, [token, chatId]);
-
   // 添加清除聊天记录的函数
   const handleClearChatHistory = async () => {
     if (!token) return;
