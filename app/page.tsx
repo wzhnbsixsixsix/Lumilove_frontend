@@ -201,6 +201,7 @@ export default function Home() {
       description: "The successful CEO who knows what he wants. Will you be his next conquest?",
       chatCount: "1.4M",
       imageSrc: "/alexander_pic1.png",
+      likeCount: "13.0K",
       creator: { id: "alexmaster", name: "AlexMaster", likeCount: "13.0K" },
     },
     {
@@ -211,6 +212,7 @@ export default function Home() {
       description: "The handsome plumber with a playful side. He's ready to fix more than just your pipes.",
       chatCount: "3.9K",
       imageSrc: "/male/male_02.png",
+      likeCount: "9.5K",
       creator: { id: "nightstalker", name: "NightStalker", likeCount: "9.5K" },
     },
     {
@@ -222,6 +224,7 @@ export default function Home() {
         "The talented swimmer who dominates the competition. But you're the only one who knows about your secret romance.",
       chatCount: "1.7K",
       imageSrc: "/male/male_03.png",
+      likeCount: "7.6K",
       creator: { id: "roadrebel", name: "RoadRebel", likeCount: "7.6K" },
     },
     {
@@ -232,6 +235,7 @@ export default function Home() {
       description: "A dangerous man with a soft spot for you. He rules the underworld, but you rule his heart.",
       chatCount: "45.2K",
       imageSrc: "/male/male_04.png",
+      likeCount: "13.0K",
       creator: { id: "alexmaster", name: "AlexMaster", likeCount: "13.0K" },
     },
     {
@@ -242,6 +246,7 @@ export default function Home() {
       description: "A brilliant surgeon who saves lives. His gentle touch heals more than just physical wounds.",
       chatCount: "28.7K",
       imageSrc: "/male/male_05.png",
+      likeCount: "9.5K",
       creator: { id: "nightstalker", name: "NightStalker", likeCount: "9.5K" },
     },
     {
@@ -252,6 +257,7 @@ export default function Home() {
       description: "A rockstar whose music speaks to your soul. Every song he writes is inspired by you.",
       chatCount: "33.1K",
       imageSrc: "/male/male_06.png",
+      likeCount: "7.6K",
       creator: { id: "roadrebel", name: "RoadRebel", likeCount: "7.6K" },
     },
     {
@@ -262,6 +268,7 @@ export default function Home() {
       description: "A dedicated cop who breaks all his own rules for you. He'll protect you from anything, even himself.",
       chatCount: "19.8K",
       imageSrc: "/male/male_7.png.png",
+      likeCount: "13.0K",
       creator: { id: "alexmaster", name: "AlexMaster", likeCount: "13.0K" },
     },
     {
@@ -272,6 +279,7 @@ export default function Home() {
       description: "A talented chef who cooks with passion. He knows the way to your heart is through your stomach.",
       chatCount: "22.4K",
       imageSrc: "/male/male_8.png.png",
+      likeCount: "9.5K",
       creator: { id: "nightstalker", name: "NightStalker", likeCount: "9.5K" },
     },
     {
@@ -282,6 +290,7 @@ export default function Home() {
       description: "A tech mogul with a cold exterior but a burning desire for you. Money can't buy what he truly wants.",
       chatCount: "41.6K",
       imageSrc: "/male/male_9.png.png",
+      likeCount: "7.6K",
       creator: { id: "roadrebel", name: "RoadRebel", likeCount: "7.6K" },
     },
   ]
@@ -297,6 +306,7 @@ export default function Home() {
         "A fierce and flirty entrepreneur, Rhonda sees you as her perfect partner in both business and pleasure.",
       chatCount: "22.2K",
       imageSrc: "/female/female01.png",
+      likeCount: "5.2K",
       creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
     },
     {
@@ -307,6 +317,7 @@ export default function Home() {
       description: "A shy and repressed girl, hiding her deep attraction to you while trying to fit in.",
       chatCount: "24.1K",
       imageSrc: "/female/female_02.png",
+      likeCount: "193",
       creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
     },
     {
@@ -317,6 +328,7 @@ export default function Home() {
       description: "A reserved mother with a hidden perverted side, she will do anything to satisfy your desires.",
       chatCount: "7.0K",
       imageSrc: "/female/female_03.jpg",
+      likeCount: "204",
       creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
     },
     {
@@ -327,6 +339,7 @@ export default function Home() {
       description: "A brilliant fashion designer with an eye for perfection. She knows what she wants and isn't afraid to take it.",
       chatCount: "18.3K",
       imageSrc: "/female/female_04.png",
+      likeCount: "193",
       creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
     },
     {
@@ -337,6 +350,7 @@ export default function Home() {
       description: "A dedicated doctor who saves lives by day and has a secret wild side that only you get to discover.",
       chatCount: "31.7K",
       imageSrc: "/female/female_05.png",
+      likeCount: "204",
       creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
     },
     {
@@ -347,6 +361,7 @@ export default function Home() {
       description: "A free-spirited artist who paints with passion. Her creativity extends beyond the canvas into every aspect of her life.",
       chatCount: "12.5K",
       imageSrc: "/female/female_06.png",
+      likeCount: "193",
       creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
     },
     {
@@ -357,6 +372,7 @@ export default function Home() {
       description: "A powerful attorney who never loses a case. She's used to being in control, but will you be the exception?",
       chatCount: "27.9K",
       imageSrc: "/female/female_07.png",
+      likeCount: "204",
       creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
     },
     {
@@ -367,6 +383,7 @@ export default function Home() {
       description: "A sweet kindergarten teacher with a hidden naughty side. She's always ready to teach you new things.",
       chatCount: "15.8K",
       imageSrc: "/female/female_08.png",
+      likeCount: "193",
       creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
     },
     {
@@ -377,6 +394,7 @@ export default function Home() {
       description: "A professional ballet dancer whose moves are as mesmerizing off the stage as they are on. Every gesture tells a story.",
       chatCount: "20.4K",
       imageSrc: "/female/female_09.png",
+      likeCount: "204",
       creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
     },
   ]
