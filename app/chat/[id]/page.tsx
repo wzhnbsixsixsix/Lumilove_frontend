@@ -300,17 +300,65 @@ export default function ChatPage() {
   useEffect(() => {
     const initializeChat = async () => {
       try {
-        console.log("Initializing chat..."); // 添加调试日志
+        console.log("开始初始化聊天...");
         const authToken = await login("w@gmail.com", "w");
-        console.log("Login successful, token:", authToken); // 添加调试日志
+        console.log("登录成功，token:", authToken);
         setToken(authToken);
+
+        // 获取当前角色ID
+        const currentCharacterId = character.id;
+        console.log("当前角色ID:", currentCharacterId);
+
+        // 加载聊天历史
+        try {
+          console.log("开始加载聊天历史...");
+          const history = await getChatHistory(authToken, currentCharacterId);
+          console.log("成功加载聊天历史:", history);
+          
+          if (history && history.length > 0) {
+            // 转换历史数据到本地消息格式
+            const convertedMessages: Message[] = [];
+            
+            history.forEach((item, index) => {
+              // 添加用户消息
+              convertedMessages.push({
+                id: item.id * 2 - 1, // 确保ID唯一
+                sender: "user",
+                text: item.message,
+                timestamp: item.createdAt,
+              });
+              
+              // 添加AI回复（跳过占位符）
+              if (item.response && item.response !== "[流式响应]" && item.response.trim() !== "") {
+                convertedMessages.push({
+                  id: item.id * 2, // 确保ID唯一
+                  sender: "ai",
+                  text: item.response,
+                  timestamp: item.createdAt,
+                });
+              }
+            });
+
+            console.log("转换后的消息:", convertedMessages);
+            setMessages(convertedMessages);
+          } else {
+            console.log("没有历史消息，使用默认消息");
+            setMessages((character.messages || []) as Message[]);
+          }
+        } catch (historyError) {
+          console.error("加载历史消息失败:", historyError);
+          console.log("使用默认消息");
+          setMessages((character.messages || []) as Message[]);
+        }
       } catch (error) {
-        console.error("Failed to login:", error);
+        console.error("初始化聊天失败:", error);
       }
     };
   
-    initializeChat();
-  }, []); // 确保依赖数组为空，只在组件挂载时执行一次
+    if (character && character.id) {
+      initializeChat();
+    }
+  }, [chatId, character]);
 
   // 1. 确保 handleQuickReply 函数在开头有明显的调试日志
 const handleQuickReply = (reply: string) => {
@@ -836,11 +884,11 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
       try {
         const historyResponse = await getChatHistory(token, parseInt(chatId));
         
-        if (historyResponse.success && historyResponse.histories.length > 0) {
+        if (historyResponse && historyResponse.length > 0) {
           // 将历史记录转换为消息格式
           const historyMessages: Message[] = [];
           
-          historyResponse.histories.forEach((item, index) => {
+          historyResponse.forEach((item, index) => {
             // 添加用户消息
             historyMessages.push({
               id: index * 2 + 1000, // 避免ID冲突
@@ -860,7 +908,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
           
           // 合并历史记录和当前消息
           setMessages(prev => [...historyMessages, ...prev]);
-          console.log(`Loaded ${historyResponse.histories.length} history items`);
+          console.log(`Loaded ${historyResponse.length} history items`);
         }
       } catch (error) {
         console.error('Failed to load chat history:', error);

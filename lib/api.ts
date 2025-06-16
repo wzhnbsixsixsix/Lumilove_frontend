@@ -143,47 +143,37 @@ interface LoginResponse {
     return () => controller.abort();
   }
 
-  // 聊天历史相关类型定义
-  interface ChatHistoryItem {
+  // 定义聊天历史类型（匹配后端）
+  export interface ChatHistoryItem {
     id: number;
+    userId: number;
+    characterId: number;
     message: string;
     response: string;
-    msgType: string;
+    msgType: 'TEXT' | 'IMAGE' | 'VOICE'; // 注意大写，匹配数据库枚举
     createdAt: string;
-  }
-
-  interface ChatHistoryResponse {
-    success: boolean;
-    histories: ChatHistoryItem[];
-    totalCount: number;
-    error?: string;
   }
 
   // 获取聊天历史
   export async function getChatHistory(
     accessToken: string,
     characterId: number
-  ): Promise<ChatHistoryResponse> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/chat/history/${characterId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
-          'X-Title': 'Lumilove',
-        },
-      });
+  ): Promise<ChatHistoryItem[]> {
+    const response = await fetch(`${API_BASE_URL}/chat/history/${characterId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
+        'X-Title': 'Lumilove',
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error(`获取聊天历史失败: ${response.status}`);
-      }
-
-      return response.json();
-    } catch (error) {
-      console.error('Error fetching chat history:', error);
-      throw error;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to get chat history: ${response.status} ${errorText}`);
     }
+
+    return response.json();
   }
 
   // 清空聊天历史
@@ -214,4 +204,3 @@ interface LoginResponse {
   }
 
   // 导出类型
-  export type { ChatHistoryItem, ChatHistoryResponse };
