@@ -28,7 +28,12 @@ interface LoginResponse {
     return data.accessToken;
   }
   
-  export async function sendChatMessage(accessToken: string, message: string, chatId: string): Promise<ChatResponse> {
+  export async function sendChatMessage(
+    accessToken: string, 
+    message: string, 
+    chatId: string,
+    characterId: number
+  ): Promise<ChatResponse> {
     const response = await fetch(`${API_BASE_URL}/chat`, {
       method: 'POST',
       headers: {
@@ -38,6 +43,7 @@ interface LoginResponse {
         'X-Title': 'Lumilove',
       },
       body: JSON.stringify({
+        characterId,
         message,
         chatId,
       }),
@@ -51,13 +57,14 @@ interface LoginResponse {
   }
 
   export async function sendChatMessageStream(
-  accessToken: string, 
-  message: string, 
-  chatId: string,
-  onChunk: (content: string) => void,
-  onComplete: () => void,
-  onError: (error: string) => void
-): Promise<() => void> {
+    accessToken: string, 
+    message: string, 
+    chatId: string,
+    characterId: number,
+    onChunk: (content: string) => void,
+    onComplete: () => void,
+    onError: (error: string) => void
+  ): Promise<() => void> {
     const controller = new AbortController();
     
     try {
@@ -70,6 +77,7 @@ interface LoginResponse {
           'X-Title': 'Lumilove',
         },
         body: JSON.stringify({
+          characterId,
           message,
           chatId,
         }),
@@ -134,3 +142,62 @@ interface LoginResponse {
     
     return () => controller.abort();
   }
+
+  // 聊天历史相关类型定义
+  interface ChatHistoryItem {
+    id: number;
+    message: string;
+    response: string;
+    msgType: string;
+    createdAt: string;
+  }
+
+  interface ChatHistoryResponse {
+    success: boolean;
+    histories: ChatHistoryItem[];
+    totalCount: number;
+    error?: string;
+  }
+
+  // 获取聊天历史
+  export async function getChatHistory(
+    accessToken: string,
+    characterId: number
+  ): Promise<ChatHistoryResponse> {
+    const response = await fetch(`${API_BASE_URL}/chat/history/${characterId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('获取聊天历史失败');
+    }
+
+    return response.json();
+  }
+
+  // 清空聊天历史
+  export async function clearChatHistory(
+    accessToken: string,
+    characterId: number
+  ): Promise<{ success: boolean; error?: string }> {
+    const response = await fetch(`${API_BASE_URL}/chat/history/${characterId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('清空聊天历史失败');
+    }
+
+    return response.json();
+  }
+
+  // 导出类型
+  export type { ChatHistoryItem, ChatHistoryResponse };
