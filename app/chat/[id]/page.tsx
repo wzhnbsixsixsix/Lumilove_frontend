@@ -309,7 +309,7 @@ export default function ChatPage() {
         const currentCharacterId = character.id;
         console.log("当前角色ID:", currentCharacterId);
 
-        // 加载聊天历史
+        // 只加载数据库中的聊天历史，不使用默认消息
         try {
           console.log("开始加载聊天历史...");
           const history = await getChatHistory(authToken, currentCharacterId);
@@ -322,7 +322,7 @@ export default function ChatPage() {
             history.forEach((item, index) => {
               // 添加用户消息
               convertedMessages.push({
-                id: item.id * 2 - 1, // 确保ID唯一
+                id: item.id * 2 - 1,
                 sender: "user",
                 text: item.message,
                 timestamp: item.createdAt,
@@ -331,7 +331,7 @@ export default function ChatPage() {
               // 添加AI回复（跳过占位符）
               if (item.response && item.response !== "[流式响应]" && item.response.trim() !== "") {
                 convertedMessages.push({
-                  id: item.id * 2, // 确保ID唯一
+                  id: item.id * 2,
                   sender: "ai",
                   text: item.response,
                   timestamp: item.createdAt,
@@ -342,13 +342,12 @@ export default function ChatPage() {
             console.log("转换后的消息:", convertedMessages);
             setMessages(convertedMessages);
           } else {
-            console.log("没有历史消息，使用默认消息");
-            setMessages((character.messages || []) as Message[]);
+            console.log("没有历史消息");
+            setMessages([]); // 空数组，不显示默认消息
           }
         } catch (historyError) {
           console.error("加载历史消息失败:", historyError);
-          console.log("使用默认消息");
-          setMessages((character.messages || []) as Message[]);
+          setMessages([]); // 加载失败也显示空数组
         }
       } catch (error) {
         console.error("初始化聊天失败:", error);
@@ -403,10 +402,8 @@ const handleQuickReply = (reply: string) => {
     if (!inputValue.trim() || !token) return;
     
     const messageText = inputValue.trim();
+    const characterId = character.id;  // 保留这行
     setInputValue("");
-    
-    // 获取当前角色的ID
-    const characterId = character.id;  // 添加这行
     
     // 添加用户消息
     const userMessage: Message = {
@@ -416,59 +413,45 @@ const handleQuickReply = (reply: string) => {
       timestamp: new Date().toISOString(),
     };
     
-    // 创建AI消息占位（显示思考状态）
+    // 创建AI消息占位
     const aiMessageId = Date.now() + 1;
-    const aiMessage: Message = {
+    const tempAiMessage: Message = {
       id: aiMessageId,
       sender: "ai",
       text: "",
       timestamp: new Date().toISOString(),
-      isThinking: true, // 初始状态为思考中
+      isThinking: true,
     };
     
-    // 使用函数式更新确保状态更新正确
-    setMessages(prev => [...prev, userMessage, aiMessage]);
+    setMessages(prev => [...prev, userMessage, tempAiMessage]);
     setIsLoading(true);
     
     try {
       let accumulatedContent = "";
-      let isFirstChunk = true;
       
       await sendChatMessageStream(
         token,
         messageText,
         chatId,
-        characterId,  // 添加这个参数
+        characterId,  // 使用变量
         (content: string) => {
           accumulatedContent += content;
-          // 使用函数式更新确保获取最新状态
           setMessages(prev => 
             prev.map(msg => 
               msg.id === aiMessageId 
                 ? { 
                     ...msg, 
                     text: accumulatedContent,
-                    isThinking: false // 收到第一个内容后停止思考状态
+                    isThinking: false
                   }
                 : msg
             )
           );
-          
-          // 第一次收到内容时，移除思考状态
-          if (isFirstChunk) {
-            isFirstChunk = false;
-          }
         },
-        () => {
-          // 完成时确保移除思考状态
-          setMessages(prev => 
-            prev.map(msg => 
-              msg.id === aiMessageId 
-                ? { ...msg, isThinking: false }
-                : msg
-            )
-          );
+        async () => {
+          // 流式完成后，重新加载数据库中的历史记录
           setIsLoading(false);
+          await reloadChatHistory();
         },
         (error: string) => {
           setMessages(prev => 
@@ -487,17 +470,6 @@ const handleQuickReply = (reply: string) => {
       );
     } catch (error) {
       console.error("流式处理失败:", error);
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === aiMessageId 
-            ? { 
-                ...msg, 
-                text: "抱歉，发送消息时出现了错误。请稍后再试。",
-                isThinking: false 
-              }
-            : msg
-        )
-      );
       setIsLoading(false);
     }
   };
@@ -529,6 +501,8 @@ const handleQuickReply = (reply: string) => {
   const callTimerRef = useRef<NodeJS.Timeout | null>(null);
   const textTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
+  const [isClearingHistory, setIsClearingHistory] = useState(false);
 
   // Call phrases
   const callPhrases = [
@@ -778,13 +752,6 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Reset messages when character changes
-  // useEffect(() => {
-  //   if (characters[params.id as keyof typeof characters]) {
-  //     setMessages(characters[params.id as keyof typeof characters].messages);
-  //   }
-  // }, [params.id]);
-
   // Show recommendation after a delay
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -920,6 +887,56 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
     loadChatHistory();
   }, [token, chatId]);
 
+  // 添加清除聊天记录的函数
+  const handleClearChatHistory = async () => {
+    if (!token) return;
+    
+    setIsClearingHistory(true);
+    try {
+      await clearChatHistory(token, character.id);
+      setMessages([]); // 清空前端显示的消息
+      setShowClearDialog(false);
+      console.log("聊天记录已清除");
+    } catch (error) {
+      console.error("清除聊天记录失败:", error);
+      // 可以添加错误提示
+    } finally {
+      setIsClearingHistory(false);
+    }
+  };
+
+  // 添加重新加载历史记录的函数
+  const reloadChatHistory = async () => {
+    if (!token) return;
+    
+    try {
+      const history = await getChatHistory(token, character.id);
+      const convertedMessages: Message[] = [];
+      
+      history.forEach((item) => {
+        convertedMessages.push({
+          id: item.id * 2 - 1,
+          sender: "user",
+          text: item.message,
+          timestamp: item.createdAt,
+        });
+        
+        if (item.response && item.response !== "[流式响应]" && item.response.trim() !== "") {
+          convertedMessages.push({
+            id: item.id * 2,
+            sender: "ai",
+            text: item.response,
+            timestamp: item.createdAt,
+          });
+        }
+      });
+      
+      setMessages(convertedMessages);
+    } catch (error) {
+      console.error("重新加载聊天历史失败:", error);
+    }
+  };
+
   return (
     <div className="flex min-h-screen relative">
       {/* Main Sidebar Navigation - 隐藏在小屏幕上，中等屏幕显示 */}
@@ -1048,7 +1065,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                 className="h-12 w-12 rounded-full overflow-hidden mr-3"
               >
                 <Image
-                  src={`/avatar/alexander_avatar.png`} //chat页面的上面的头像照片
+                  src={`/avatar/alexander_avatar.png`}
                   alt={character.name}
                   width={48}
                   height={48}
@@ -1058,6 +1075,16 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
               <h2 className="text-lg md:text-xl font-semibold">{character.name}</h2>
             </div>
             <div className="flex items-center space-x-3">
+              {/* 添加清除聊天记录按钮 */}
+              <button
+                className="p-3 rounded-full hover:bg-[#2a1a34] text-gray-400 hover:text-white"
+                onClick={() => setShowClearDialog(true)}
+                title="清除聊天记录"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
               <button
                 className="p-3 rounded-full hover:bg-[#2a1a34]"
                 onClick={handleCallButtonClick}
@@ -2041,6 +2068,34 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
               </div>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 清除聊天记录确认对话框 */}
+      <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <DialogContent className="bg-[#1a0a24] border-[#3a1a44] text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">清除聊天记录</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              确定要清除与 {character.name} 的所有聊天记录吗？此操作无法撤销。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowClearDialog(false)}
+              disabled={isClearingHistory}
+            >
+              取消
+            </Button>
+            <Button
+              className="bg-red-500 hover:bg-red-600"
+              onClick={handleClearChatHistory}
+              disabled={isClearingHistory}
+            >
+              {isClearingHistory ? "清除中..." : "确认清除"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
