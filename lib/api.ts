@@ -152,8 +152,16 @@ interface LoginResponse {
     characterId: number;
     message: string;
     response: string;
-    msgType: 'TEXT' | 'IMAGE' | 'VOICE'; // 注意大写，匹配数据库枚举
+    msgType: 'text' | 'image' | 'voice'; // 改为小写
     createdAt: string;
+  }
+
+  // 添加后端响应的包装类型
+  export interface ChatHistoryResponse {
+    success: boolean;
+    histories: ChatHistoryItem[];
+    totalCount: number;
+    error?: string;
   }
 
   // 获取聊天历史
@@ -175,7 +183,13 @@ interface LoginResponse {
       throw new Error(`Failed to get chat history: ${response.status} ${errorText}`);
     }
 
-    return response.json();
+    const data: ChatHistoryResponse = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to get chat history');
+    }
+    
+    return data.histories || [];
   }
 
   // 清空聊天历史
