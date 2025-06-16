@@ -32,7 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { login, sendChatMessage, sendChatMessageStream } from "@/lib/api";
+import { login, sendChatMessage, sendChatMessageStream, getChatHistory, clearChatHistory, type ChatHistoryItem } from "@/lib/api";
 
 import Sidebar from "@/components/sidebar";
 import {
@@ -480,6 +480,7 @@ const handleQuickReply = (reply: string) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const callTimerRef = useRef<NodeJS.Timeout | null>(null);
   const textTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   // Call phrases
   const callPhrases = [
@@ -825,6 +826,51 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
       document.head.removeChild(styleElement);
     };
   }, []);
+
+  // 加载聊天历史记录
+  useEffect(() => {
+    const loadChatHistory = async () => {
+      if (!token || !chatId) return;
+      
+      setIsLoadingHistory(true);
+      try {
+        const historyResponse = await getChatHistory(token, parseInt(chatId));
+        
+        if (historyResponse.success && historyResponse.histories.length > 0) {
+          // 将历史记录转换为消息格式
+          const historyMessages: Message[] = [];
+          
+          historyResponse.histories.forEach((item, index) => {
+            // 添加用户消息
+            historyMessages.push({
+              id: index * 2 + 1000, // 避免ID冲突
+              sender: "user",
+              text: item.message,
+              timestamp: item.createdAt,
+            });
+            
+            // 添加AI回复
+            historyMessages.push({
+              id: index * 2 + 1001,
+              sender: "ai", 
+              text: item.response,
+              timestamp: item.createdAt,
+            });
+          });
+          
+          // 合并历史记录和当前消息
+          setMessages(prev => [...historyMessages, ...prev]);
+          console.log(`Loaded ${historyResponse.histories.length} history items`);
+        }
+      } catch (error) {
+        console.error('Failed to load chat history:', error);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    loadChatHistory();
+  }, [token, chatId]);
 
   return (
     <div className="flex min-h-screen relative">

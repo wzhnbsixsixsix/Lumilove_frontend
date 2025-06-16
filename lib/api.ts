@@ -164,19 +164,26 @@ interface LoginResponse {
     accessToken: string,
     characterId: number
   ): Promise<ChatHistoryResponse> {
-    const response = await fetch(`${API_BASE_URL}/chat/history/${characterId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat/history/${characterId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
+          'X-Title': 'Lumilove',
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error('获取聊天历史失败');
+      if (!response.ok) {
+        throw new Error(`获取聊天历史失败: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching chat history:', error);
+      throw error;
     }
-
-    return response.json();
   }
 
   // 清空聊天历史
@@ -184,19 +191,26 @@ interface LoginResponse {
     accessToken: string,
     characterId: number
   ): Promise<{ success: boolean; error?: string }> {
-    const response = await fetch(`${API_BASE_URL}/chat/history/${characterId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat/history/${characterId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
+          'X-Title': 'Lumilove',
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error('清空聊天历史失败');
+      if (!response.ok) {
+        throw new Error(`清空聊天历史失败: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error clearing chat history:', error);
+      throw error;
     }
-
-    return response.json();
   }
 
   // 导出类型
