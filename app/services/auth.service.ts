@@ -43,6 +43,12 @@ class AuthService {
     } catch (error) {
       console.error('Logout error:', error);
       // 即使登出失败，我们也继续清除本地状态
+    } finally {
+      // 无论API调用成功与否，都要清除本地token
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('refreshToken'); // 如果有refresh token也要清除
+      console.log('Local auth data cleared');
     }
   }
 

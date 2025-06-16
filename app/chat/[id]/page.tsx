@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // ... 其余代码保持不变
 
@@ -61,6 +62,7 @@ export default function ChatPage() {
 
   const params = useParams();
   const chatId = params.id as string;
+  const router = useRouter();
 
   // 修改 messages 状态定义
   const [messages, setMessages] = useState<Message[]>([]);
@@ -301,25 +303,35 @@ export default function ChatPage() {
     const initializeChat = async () => {
       try {
         console.log("开始初始化聊天...");
-        const authToken = await login("w@gmail.com", "w");
-        console.log("登录成功，token:", authToken);
-        setToken(authToken);
+        
+        // 首先检查本地存储中是否有有效的token
+        const storedToken = localStorage.getItem('token');
+        if (!storedToken) {
+          console.log("用户未登录，跳转到登录页面");
+          // 如果没有token，跳转到登录页面
+          router.push('/login');
+          return;
+        }
 
-        // 获取当前角色ID
-        const currentCharacterId = character.id;
-        console.log("当前角色ID:", currentCharacterId);
-
-        // 只加载数据库中的聊天历史，不使用默认消息
+        // 验证token是否有效（可选：调用API验证）
         try {
-          console.log("开始加载聊天历史...");
-          const history = await getChatHistory(authToken, currentCharacterId);
+          // 可以添加token验证API调用
+          console.log("使用已存在的token:", storedToken);
+          setToken(storedToken);
+          
+          // 获取当前角色ID
+          const currentCharacterId = character.id;
+          console.log("当前角色ID:", currentCharacterId);
+
+          // 加载聊天历史
+          const history = await getChatHistory(storedToken, currentCharacterId);
           console.log("成功加载聊天历史:", history);
           
           if (history && history.length > 0) {
             // 转换历史数据到本地消息格式
             const convertedMessages: Message[] = [];
             
-            history.forEach((item, index) => {
+            history.forEach((item) => {
               // 添加用户消息
               convertedMessages.push({
                 id: item.id * 2 - 1,
@@ -343,21 +355,30 @@ export default function ChatPage() {
             setMessages(convertedMessages);
           } else {
             console.log("没有历史消息");
-            setMessages([]); // 空数组，不显示默认消息
+            setMessages([]);
           }
         } catch (historyError) {
           console.error("加载历史消息失败:", historyError);
-          setMessages([]); // 加载失败也显示空数组
+          // 如果token无效，清除本地存储并跳转到登录页面
+          if ((historyError as any)?.message?.includes('401')) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            router.push('/login');
+            return;
+          }
+          setMessages([]);
         }
       } catch (error) {
         console.error("初始化聊天失败:", error);
+        // 如果初始化失败，可能需要重新登录
+        router.push('/login');
       }
     };
   
     if (character && character.id) {
       initializeChat();
     }
-  }, [chatId, character]);
+  }, [chatId, character, router]);
 
   // 1. 确保 handleQuickReply 函数在开头有明显的调试日志
 const handleQuickReply = (reply: string) => {
