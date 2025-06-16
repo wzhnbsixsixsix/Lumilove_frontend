@@ -109,7 +109,9 @@ export default function EditProfilePage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
+          'X-Title': 'Lumilove',
         },
         credentials: 'include',
         body: JSON.stringify(user),

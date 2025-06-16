@@ -16,6 +16,8 @@ interface LoginResponse {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
+        'X-Title': 'Lumilove',
       },
       body: JSON.stringify({ email, password }),
     });

@@ -143,7 +143,9 @@ export default function Home() {
             method: 'GET',
             headers: {
               'Authorization': tokenValue,
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
+              'X-Title': 'Lumilove',
             },
             credentials: 'include'
           })
