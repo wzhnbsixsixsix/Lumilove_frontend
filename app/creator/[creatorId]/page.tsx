@@ -51,7 +51,9 @@ const mockCreatorData = {
   ],
 }
 
-export default function CreatorProfilePage({ params }: { params: { creatorId: string } }) {
+export default async function CreatorProfilePage({ params }: { params: Promise<{ creatorId: string }> }) {
+  const { creatorId } = await params;
+
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
 
@@ -59,11 +61,11 @@ export default function CreatorProfilePage({ params }: { params: { creatorId: st
   const creatorData = React.useMemo(() => {
     // 这里可以添加数据获取逻辑
     return mockCreatorData
-  }, [params.creatorId])
+  }, [creatorId])
 
   const shareUrl = React.useMemo(() => {
-    return `https://lumilove.com/creator/${params.creatorId}`
-  }, [params.creatorId])
+    return `https://lumilove.com/creator/${creatorId}`
+  }, [creatorId])
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareUrl)
