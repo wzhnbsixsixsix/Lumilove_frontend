@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, ArrowRight, Lock, Flame, AlertCircle } from "lucide-react"
+import { ArrowLeft, ArrowRight, Lock, Flame, AlertCircle, Eye, EyeOff, Globe, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Sidebar from "@/components/sidebar"
 
@@ -17,12 +17,13 @@ interface Selection {
   interactionStyle?: string
   intimateBehavior?: string
   interactionFrequency?: string
+  isPrivate?: boolean
 }
 
 export default function CreateLoverPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
-  const [selections, setSelections] = useState<Selection>({})
+  const [selections, setSelections] = useState<Selection>({ isPrivate: false })
   const [isAnimating, setIsAnimating] = useState(false)
   const [autoAdvance, setAutoAdvance] = useState(true)
   const [showValidationError, setShowValidationError] = useState(false)
@@ -68,6 +69,11 @@ export default function CreateLoverPage() {
             setTimeout(() => nextStep(), 800)
           }
           break
+        case 7:
+          if (selections.isPrivate !== undefined) {
+            setTimeout(() => nextStep(), 800)
+          }
+          break
       }
     }
     checkAutoAdvance()
@@ -87,6 +93,8 @@ export default function CreateLoverPage() {
         return selections.personality && selections.personality.length > 0
       case 6:
         return !!(selections.interactionStyle && selections.interactionFrequency)
+      case 7:
+        return selections.isPrivate !== undefined
       default:
         return true
     }
@@ -103,7 +111,7 @@ export default function CreateLoverPage() {
       return
     }
 
-    if (currentStep < 7) {
+    if (currentStep < 8) {
       setIsAnimating(true)
       setTimeout(() => {
         setCurrentStep(currentStep + 1)
@@ -141,22 +149,187 @@ export default function CreateLoverPage() {
     router.push("/premium")
   }
 
+  // 根据性格生成个性化欢迎消息
+  const getWelcomeMessage = () => {
+    const personality = selections.personality?.[0]
+    switch (personality) {
+      case "Nympho":
+        return "I've been waiting for you... 😈"
+      case "Innocent":
+        return "Nice to meet you! I'm so excited to chat! 😊"
+      case "Dominant":
+        return "You're here. Good. Let's see what you're made of."
+      case "Submissive":
+        return "I'm here for you... whatever you need 😇"
+      case "Playful":
+        return "Hey there! Ready to have some fun? 😄"
+      case "Romantic":
+        return "I've been thinking about you all day... 💕"
+      case "Mysterious":
+        return "There's so much you don't know about me yet... 🌙"
+      case "Confident":
+        return "You made the right choice coming to me 😏"
+      default:
+        return "Hello! I'm excited to get to know you better! ✨"
+    }
+  }
+
+  // 创建角色的完整逻辑
+  const createCharacter = () => {
+    const characterId = Date.now()
+    const characterName = `${selections.personality?.[0] || "My"} ${selections.style || "AI"}`
+    
+    // 创建完整角色数据结构
+    const newCharacter = {
+      id: characterId,
+      name: characterName,
+      age: 22,
+      occupation: selections.roleType?.[0] || "Friend",
+      tags: selections.personality || ["Friendly"],
+      followers: Math.floor(Math.random() * 1000000) + "K",
+      description: `A ${selections.personality?.[0]?.toLowerCase() || "friendly"} ${selections.style?.toLowerCase() || "AI"} who loves ${selections.relationship?.toLowerCase() || "chatting"}. ${selections.bodyType} build with ${selections.personality?.join(", ").toLowerCase()} personality.`,
+      images: [`/placeholder.svg?height=400&width=300&text=${characterName}`],
+      createdAt: new Date().toISOString(),
+      isPrivate: selections.isPrivate || false,
+      creatorId: "user", // 用户创建的角色
+      stats: {
+        views: 0,
+        likes: 0,
+        chats: 0
+      },
+      // 角色属性
+      attributes: {
+        style: selections.style,
+        roleType: selections.roleType,
+        relationship: selections.relationship,
+        bodyType: selections.bodyType,
+        breastSize: selections.breastSize,
+        buttSize: selections.buttSize,
+        personality: selections.personality,
+        interactionStyle: selections.interactionStyle,
+        intimateBehavior: selections.intimateBehavior,
+        interactionFrequency: selections.interactionFrequency
+      },
+      // 聊天系统需要的消息
+      messages: [
+        {
+          id: 1,
+          sender: "ai" as const,
+          text: getWelcomeMessage(),
+          timestamp: new Date().toISOString(),
+          audioDuration: 8,
+          hasImage: false,
+        }
+      ]
+    }
+
+    // 1. 保存到用户数据（用于资料页面）
+    const existingUserData = JSON.parse(localStorage.getItem('mockUserData') || '{}')
+    if (!existingUserData.characters) {
+      existingUserData.characters = { private: [], public: [] }
+    }
+    
+    const characterForProfile = {
+      id: characterId,
+      name: characterName,
+      imageSrc: `/placeholder.svg?height=400&width=300&text=${characterName}`,
+      tags: selections.personality || ["Friendly"],
+      description: newCharacter.description,
+      isPrivate: selections.isPrivate || false,
+      createdAt: new Date().toISOString(),
+      stats: newCharacter.stats
+    }
+
+    if (selections.isPrivate) {
+      existingUserData.characters.private.push(characterForProfile)
+    } else {
+      existingUserData.characters.public.push(characterForProfile)
+    }
+    
+    localStorage.setItem('mockUserData', JSON.stringify(existingUserData))
+
+    // 2. 保存到聊天系统
+    const existingChatCharacters = JSON.parse(localStorage.getItem('chatCharacters') || '{}')
+    existingChatCharacters[characterId.toString()] = newCharacter
+    localStorage.setItem('chatCharacters', JSON.stringify(existingChatCharacters))
+
+    // 3. 触发数据更新事件
+    window.dispatchEvent(new CustomEvent('userDataUpdated'))
+
+    return newCharacter
+  }
+
   const ProgressBar = () => (
     <div className="flex items-center justify-center mb-12">
-      {[1, 2, 3, 4, 5, 6, 7].map((step) => (
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((step) => (
         <div key={step} className="flex items-center">
           <div
             className={`w-5 h-5 rounded-full transition-all duration-300 ${
               step <= currentStep ? "bg-pink-500" : "bg-gray-600"
             }`}
           />
-          {step < 7 && (
+          {step < 8 && (
             <div
               className={`w-16 h-0.5 transition-all duration-300 ${step < currentStep ? "bg-pink-500" : "bg-gray-600"}`}
             />
           )}
         </div>
       ))}
+    </div>
+  )
+
+  // 隐私选择器组件
+  const PrivacySelector = () => (
+    <div className="grid grid-cols-2 gap-8 max-w-4xl mx-auto">
+      <div
+        className={`relative p-8 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+          selections.isPrivate === false
+            ? "bg-green-500/20 border-2 border-green-500 shadow-lg shadow-green-500/20"
+            : "bg-[#2a1a34] border border-[#3a1a44] hover:border-green-400"
+        }`}
+        onClick={() => updateSelection("isPrivate", false)}
+      >
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center">
+            <Globe className="h-10 w-10 text-green-400" />
+          </div>
+          <h3 className="text-white font-bold text-2xl mb-4">公开角色</h3>
+          <p className="text-gray-300 text-lg leading-relaxed mb-6">
+            其他用户可以发现和查看您的角色。角色会出现在公开列表中，可以获得点赞和互动。
+          </p>
+          <div className="bg-green-500/10 rounded-lg p-4">
+            <div className="flex items-center justify-center text-green-400 text-sm">
+              <Eye className="h-4 w-4 mr-2" />
+              可被其他用户发现
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className={`relative p-8 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+          selections.isPrivate === true
+            ? "bg-purple-500/20 border-2 border-purple-500 shadow-lg shadow-purple-500/20"
+            : "bg-[#2a1a34] border border-[#3a1a44] hover:border-purple-400"
+        }`}
+        onClick={() => updateSelection("isPrivate", true)}
+      >
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-purple-500/20 rounded-full flex items-center justify-center">
+            <Shield className="h-10 w-10 text-purple-400" />
+          </div>
+          <h3 className="text-white font-bold text-2xl mb-4">私密角色</h3>
+          <p className="text-gray-300 text-lg leading-relaxed mb-6">
+            只有您可以看到和使用这个角色。完全私密，不会出现在任何公开列表中。
+          </p>
+          <div className="bg-purple-500/10 rounded-lg p-4">
+            <div className="flex items-center justify-center text-purple-400 text-sm">
+              <EyeOff className="h-4 w-4 mr-2" />
+              仅您可见
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 
@@ -198,13 +371,7 @@ export default function CreateLoverPage() {
 
       {isLocked && (
         <div className="absolute top-3 right-3 bg-yellow-500 rounded-full p-2">
-          <Lock className="h-5 w-5 text-black" />
-        </div>
-      )}
-
-      {isSelected && !isLocked && (
-        <div className="absolute top-3 right-3 bg-pink-500 rounded-full p-2">
-          <div className="h-4 w-4 bg-white rounded-full" />
+          <Lock className="h-4 w-4 text-white" />
         </div>
       )}
     </div>
@@ -224,7 +391,7 @@ export default function CreateLoverPage() {
     isLocked?: boolean
   }) => (
     <div
-      className={`relative p-8 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+      className={`relative p-6 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 ${
         isSelected
           ? "bg-pink-500/20 border-2 border-pink-500 shadow-lg shadow-pink-500/20"
           : "bg-[#2a1a34] border border-[#3a1a44] hover:border-pink-400"
@@ -238,13 +405,7 @@ export default function CreateLoverPage() {
 
       {isLocked && (
         <div className="absolute top-3 right-3 bg-yellow-500 rounded-full p-2">
-          <Lock className="h-5 w-5 text-black" />
-        </div>
-      )}
-
-      {isSelected && !isLocked && (
-        <div className="absolute top-3 right-3 bg-pink-500 rounded-full p-2">
-          <div className="h-4 w-4 bg-white rounded-full" />
+          <Lock className="h-4 w-4 text-white" />
         </div>
       )}
     </div>
@@ -254,149 +415,148 @@ export default function CreateLoverPage() {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-12">
-            <h2 className="text-4xl font-bold text-white text-center">Choose Your Fantasy Style</h2>
-            <div className="grid grid-cols-3 gap-12 max-w-6xl mx-auto">
-              <OptionCard
-                option="Realistic"
-                isSelected={selections.style === "realistic"}
-                onClick={() => updateSelection("style", "realistic")}
-                image="/placeholder.svg?height=300&width=300&text=Realistic+Style"
-              />
-              <OptionCard
-                option="Anime"
-                isSelected={selections.style === "anime"}
-                onClick={() => updateSelection("style", "anime")}
-                image="/placeholder.svg?height=300&width=300&text=Anime+Style"
-              />
-              <OptionCard
-                option="Hybrid"
-                isSelected={selections.style === "hybrid"}
-                onClick={() => updateSelection("style", "hybrid")}
-                image="/placeholder.svg?height=300&width=300&text=Hybrid+Style"
-              />
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">Choose a Style</h2>
+            <p className="text-gray-300 text-xl mb-12">Pick the visual style for your AI companion</p>
+
+            <div className="grid grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {[
+                { style: "Anime Style", image: "/placeholder.svg?height=300&width=300&text=Anime+Style" },
+                { style: "Realistic Style", image: "/placeholder.svg?height=300&width=300&text=Realistic+Style" },
+                { style: "Hybrid Style", image: "/placeholder.svg?height=300&width=300&text=Hybrid+Style" },
+              ].map((item) => (
+                <OptionCard
+                  key={item.style}
+                  option={item.style}
+                  image={item.image}
+                  isSelected={selections.style === item.style}
+                  onClick={() => updateSelection("style", item.style)}
+                />
+              ))}
             </div>
           </div>
         )
 
       case 2:
         return (
-          <div className="space-y-12">
-            <h2 className="text-4xl font-bold text-white text-center">Pick Your Role Type</h2>
-            <div className="grid grid-cols-4 gap-8 max-w-7xl mx-auto">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">Choose Role Type</h2>
+            <p className="text-gray-300 text-xl mb-12">What kind of character do you want? (Select multiple)</p>
+
+            <div className="grid grid-cols-4 gap-6 max-w-6xl mx-auto">
               {[
-                { name: "Schoolgirl", locked: false },
-                { name: "MILF", locked: true },
-                { name: "Femboy", locked: true },
-                { name: "Monster", locked: true },
-                { name: "Plumber", locked: false },
-                { name: "Boss", locked: false },
-                { name: "Nurse", locked: false },
-                { name: "Teacher", locked: true },
-              ].map((role) => (
+                { role: "Schoolgirl", image: "/placeholder.svg?height=200&width=200&text=Schoolgirl" },
+                { role: "Boss", image: "/placeholder.svg?height=200&width=200&text=Boss" },
+                { role: "Plumber", image: "/placeholder.svg?height=200&width=200&text=Plumber" },
+                { role: "Monster", image: "/placeholder.svg?height=200&width=200&text=Monster", isLocked: true },
+                { role: "Femboy", image: "/placeholder.svg?height=200&width=200&text=Femboy", isLocked: true },
+                { role: "MILF", image: "/placeholder.svg?height=200&width=200&text=MILF", isLocked: true },
+                { role: "Teacher", image: "/placeholder.svg?height=200&width=200&text=Teacher", isLocked: true },
+                { role: "Nurse", image: "/placeholder.svg?height=200&width=200&text=Nurse" },
+              ].map((item) => (
                 <OptionCard
-                  key={role.name}
-                  option={role.name}
-                  isSelected={selections.roleType?.includes(role.name) || false}
-                  onClick={() => toggleArraySelection("roleType", role.name)}
-                  isLocked={role.locked}
-                  image={`/placeholder.svg?height=200&width=200&text=${role.name}`}
+                  key={item.role}
+                  option={item.role}
+                  image={item.image}
+                  isSelected={selections.roleType?.includes(item.role) || false}
+                  onClick={() => toggleArraySelection("roleType", item.role)}
+                  isLocked={item.isLocked}
                 />
               ))}
             </div>
-            {selections.roleType &&
-              selections.roleType.some((role) => ["MILF", "Femboy", "Monster", "Teacher"].includes(role)) && (
-                <div className="text-center text-yellow-400 text-sm">🔒 Some roles require VIP subscription</div>
-              )}
           </div>
         )
 
       case 3:
         return (
-          <div className="space-y-12">
-            <h2 className="text-4xl font-bold text-white text-center">Relationship</h2>
-            <div className="grid grid-cols-4 gap-8 max-w-7xl mx-auto">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">Relationship</h2>
+            <p className="text-gray-300 text-xl mb-12">What's your relationship with this character?</p>
+
+            <div className="grid grid-cols-4 gap-8 max-w-6xl mx-auto">
               {[
-                { name: "Girlfriend", locked: false, icon: "💕" },
-                { name: "Mistress", locked: false, icon: "👑" },
-                { name: "One Night Stand", locked: false, icon: "🌙" },
-                { name: "Step Sister", locked: true, icon: "💖" },
-                { name: "Step Mom", locked: true, icon: "🔥" },
-                { name: "Best Friend", locked: false, icon: "👯" },
-                { name: "Colleague", locked: false, icon: "💼" },
-                { name: "Stranger", locked: false, icon: "❓" },
-              ].map((rel) => (
+                { relationship: "Girlfriend", icon: "💕" },
+                { relationship: "Friend", icon: "👫" },
+                { relationship: "Roommate", icon: "🏠" },
+                { relationship: "Neighbor", icon: "🏘️" },
+                { relationship: "Step Sister", icon: "👭", isLocked: true },
+                { relationship: "Step Mom", icon: "👩‍👧", isLocked: true },
+                { relationship: "Stranger", icon: "❓" },
+                { relationship: "Coworker", icon: "💼" },
+              ].map((item) => (
                 <RelationshipCard
-                  key={rel.name}
-                  option={rel.name}
-                  icon={rel.icon}
-                  isSelected={selections.relationship === rel.name}
-                  onClick={() => updateSelection("relationship", rel.name)}
-                  isLocked={rel.locked}
+                  key={item.relationship}
+                  option={item.relationship}
+                  icon={item.icon}
+                  isSelected={selections.relationship === item.relationship}
+                  onClick={() => updateSelection("relationship", item.relationship)}
+                  isLocked={item.isLocked}
                 />
               ))}
             </div>
-            {["Step Sister", "Step Mom"].includes(selections.relationship || "") && (
-              <div className="text-center bg-yellow-500/20 border border-yellow-500 rounded-lg p-4 max-w-md mx-auto">
-                <p className="text-yellow-400">🔒 Upgrade to Unlock</p>
-                <p className="text-gray-300 text-sm">Premium relationships require subscription</p>
-              </div>
-            )}
           </div>
         )
 
       case 4:
         return (
-          <div className="space-y-12">
-            <h2 className="text-4xl font-bold text-white text-center">Body Customization</h2>
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">Physical Attributes</h2>
+            <p className="text-gray-300 text-xl mb-12">Customize the physical appearance</p>
 
-            <div className="space-y-10">
+            <div className="space-y-16">
+              {/* Body Type */}
               <div>
-                <h3 className="text-2xl text-white mb-6">Body Type</h3>
-                <div className="grid grid-cols-4 gap-6">
-                  {["Slim", "Athletic", "Chubby", "Voluptuous"].map((type) => (
+                <h3 className="text-2xl font-semibold text-white mb-8">Body Type</h3>
+                <div className="grid grid-cols-6 gap-4 max-w-6xl mx-auto">
+                  {["Slim", "Athletic", "Medium", "Voluptuous", "Chubby", "Small"].map((type) => (
                     <OptionCard
                       key={type}
                       option={type}
+                      image={`/placeholder.svg?height=180&width=180&text=${type}`}
                       isSelected={selections.bodyType === type}
                       onClick={() => updateSelection("bodyType", type)}
-                      image={`/placeholder.svg?height=180&width=180&text=${type}`}
+                      className="p-4"
                     />
                   ))}
                 </div>
               </div>
 
+              {/* Breast Size */}
               <div>
-                <h3 className="text-2xl text-white mb-6">Breast Size</h3>
-                <div className="grid grid-cols-4 gap-6">
+                <h3 className="text-2xl font-semibold text-white mb-8">Breast Size</h3>
+                <div className="grid grid-cols-5 gap-4 max-w-5xl mx-auto">
                   {[
-                    { name: "Small", locked: false },
-                    { name: "Medium", locked: false },
-                    { name: "Large", locked: false },
-                    { name: "Huge", locked: true },
-                  ].map((size) => (
+                    { size: "Flat", isLocked: false },
+                    { size: "Small", isLocked: false },
+                    { size: "Medium", isLocked: false },
+                    { size: "Large", isLocked: false },
+                    { size: "Huge", isLocked: true },
+                  ].map((item) => (
                     <OptionCard
-                      key={size.name}
-                      option={size.name}
-                      isSelected={selections.breastSize === size.name}
-                      onClick={() => updateSelection("breastSize", size.name)}
-                      isLocked={size.locked}
-                      image={`/placeholder.svg?height=180&width=180&text=${size.name}`}
+                      key={item.size}
+                      option={item.size}
+                      image={`/placeholder.svg?height=180&width=180&text=${item.size}`}
+                      isSelected={selections.breastSize === item.size}
+                      onClick={() => updateSelection("breastSize", item.size)}
+                      isLocked={item.isLocked}
+                      className="p-4"
                     />
                   ))}
                 </div>
               </div>
 
+              {/* Butt Size */}
               <div>
-                <h3 className="text-2xl text-white mb-6">Butt Size</h3>
-                <div className="grid grid-cols-4 gap-6">
-                  {["Flat", "Medium", "Large", "Jiggly"].map((size) => (
+                <h3 className="text-2xl font-semibold text-white mb-8">Butt Size</h3>
+                <div className="grid grid-cols-4 gap-4 max-w-4xl mx-auto">
+                  {["Small", "Medium", "Large", "Jiggly"].map((size) => (
                     <OptionCard
                       key={size}
                       option={size}
+                      image={`/placeholder.svg?height=180&width=180&text=${size}`}
                       isSelected={selections.buttSize === size}
                       onClick={() => updateSelection("buttSize", size)}
-                      image={`/placeholder.svg?height=180&width=180&text=${size}`}
+                      className="p-4"
                     />
                   ))}
                 </div>
@@ -407,25 +567,36 @@ export default function CreateLoverPage() {
 
       case 5:
         return (
-          <div className="space-y-12">
-            <h2 className="text-4xl font-bold text-white text-center">Personality</h2>
-            <div className="grid grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">Personality</h2>
+            <p className="text-gray-300 text-xl mb-12">Choose personality traits (Select multiple)</p>
+
+            <div className="grid grid-cols-4 gap-6 max-w-6xl mx-auto">
               {[
-                { name: "Nympho", icon: "🔥", desc: "Insatiable, passionate, and constantly craving intimacy." },
-                { name: "Submissive", icon: "💖", desc: "Obedient, yielding, and happy to follow." },
-                { name: "Mean", icon: "❄️", desc: "Cold, dismissive, and often sarcastic." },
-                { name: "Temptress", icon: "😈", desc: "Flirtatious, playful, and always leaving you wanting more." },
-                { name: "Innocent", icon: "😇", desc: "Optimistic, naive, and sees world with wonder." },
-                { name: "Dominant", icon: "👑", desc: "Assertive, controlling, and commanding." },
-              ].map((personality) => (
-                <OptionCard
-                  key={personality.name}
-                  option={personality.name}
-                  isSelected={selections.personality?.includes(personality.name) || false}
-                  onClick={() => toggleArraySelection("personality", personality.name)}
-                  description={personality.desc}
-                  className="min-h-[200px]"
-                />
+                { trait: "Nympho", icon: "😈", description: "Highly passionate and seductive" },
+                { trait: "Innocent", icon: "😇", description: "Sweet and pure-hearted" },
+                { trait: "Dominant", icon: "👑", description: "Takes charge and leads" },
+                { trait: "Submissive", icon: "🙇‍♀️", description: "Gentle and accommodating" },
+                { trait: "Playful", icon: "😄", description: "Fun-loving and energetic" },
+                { trait: "Romantic", icon: "💕", description: "Loving and affectionate" },
+                { trait: "Mysterious", icon: "🌙", description: "Enigmatic and intriguing" },
+                { trait: "Confident", icon: "💪", description: "Self-assured and bold" },
+              ].map((item) => (
+                <div
+                  key={item.trait}
+                  className={`relative p-6 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+                    selections.personality?.includes(item.trait)
+                      ? "bg-pink-500/20 border-2 border-pink-500 shadow-lg shadow-pink-500/20"
+                      : "bg-[#2a1a34] border border-[#3a1a44] hover:border-pink-400"
+                  }`}
+                  onClick={() => toggleArraySelection("personality", item.trait)}
+                >
+                  <div className="text-center">
+                    <div className="text-4xl mb-3">{item.icon}</div>
+                    <h3 className="text-white font-medium text-xl mb-2">{item.trait}</h3>
+                    <p className="text-gray-400 text-sm">{item.description}</p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -433,66 +604,67 @@ export default function CreateLoverPage() {
 
       case 6:
         return (
-          <div className="space-y-12">
-            <h2 className="text-4xl font-bold text-white text-center">Behavioral Preferences</h2>
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">Interaction Preferences</h2>
+            <p className="text-gray-300 text-xl mb-12">How should your AI behave?</p>
 
-            <div className="space-y-12">
+            <div className="space-y-16">
+              {/* Interaction Style */}
               <div>
-                <h3 className="text-2xl text-white mb-6">✨ Interaction Style</h3>
-                <div className="grid grid-cols-3 gap-6">
+                <h3 className="text-2xl font-semibold text-white mb-8">Interaction Style</h3>
+                <div className="grid grid-cols-3 gap-6 max-w-4xl mx-auto">
                   {[
-                    { name: "Flirty", desc: "Playful and charming" },
-                    { name: "Teasing", desc: "Loves to tease and provoke" },
-                    { name: "Obedient", desc: "Always ready to please" },
-                    { name: "Playful", desc: "Fun and mischievous" },
-                    { name: "Possessive", desc: "Wants you all to herself" },
-                  ].map((style) => (
+                    { style: "Flirty", description: "Playful and teasing" },
+                    { style: "Sweet", description: "Kind and caring" },
+                    { style: "Bold", description: "Direct and confident" },
+                  ].map((item) => (
                     <OptionCard
-                      key={style.name}
-                      option={style.name}
-                      isSelected={selections.interactionStyle === style.name}
-                      onClick={() => updateSelection("interactionStyle", style.name)}
-                      description={style.desc}
+                      key={item.style}
+                      option={item.style}
+                      description={item.description}
+                      isSelected={selections.interactionStyle === item.style}
+                      onClick={() => updateSelection("interactionStyle", item.style)}
                     />
                   ))}
                 </div>
               </div>
 
+              {/* Interaction Frequency */}
               <div>
-                <h3 className="text-2xl text-white mb-6">🔥 Intimate Behaviors (PRO Exclusive)</h3>
-                <div className="grid grid-cols-2 gap-6">
+                <h3 className="text-2xl font-semibold text-white mb-8">Response Style</h3>
+                <div className="grid grid-cols-3 gap-6 max-w-4xl mx-auto">
                   {[
-                    { name: "Likes Sexting", desc: "Sends naughty messages" },
-                    { name: "Sends NSFW", desc: "Shares intimate photos" },
-                    { name: "Jealous Lover", desc: "Gets possessive and jealous" },
-                    { name: "Public Flirt", desc: "Flirts in public places" },
-                  ].map((behavior) => (
+                    { freq: "Quick", description: "Short, frequent messages" },
+                    { freq: "Detailed", description: "Longer, descriptive responses" },
+                    { freq: "Balanced", description: "Mix of both styles" },
+                  ].map((item) => (
                     <OptionCard
-                      key={behavior.name}
-                      option={behavior.name}
-                      isSelected={selections.intimateBehavior === behavior.name}
-                      onClick={() => updateSelection("intimateBehavior", behavior.name)}
-                      isLocked={true}
-                      description={behavior.desc}
+                      key={item.freq}
+                      option={item.freq}
+                      description={item.description}
+                      isSelected={selections.interactionFrequency === item.freq}
+                      onClick={() => updateSelection("interactionFrequency", item.freq)}
                     />
                   ))}
                 </div>
               </div>
 
+              {/* Intimate Behavior (Premium) */}
               <div>
-                <h3 className="text-2xl text-white mb-6">📅 Interaction Frequency</h3>
-                <div className="grid grid-cols-3 gap-6">
+                <h3 className="text-2xl font-semibold text-white mb-8">Intimate Behavior (Premium)</h3>
+                <div className="grid grid-cols-3 gap-6 max-w-4xl mx-auto">
                   {[
-                    { name: "Daily Messages", desc: "Regular daily check-ins" },
-                    { name: "Late-night Chats", desc: "Prefers evening conversations" },
-                    { name: "Surprise Selfies", desc: "Sends random photos" },
-                  ].map((freq) => (
+                    { behavior: "Romantic", description: "Focus on emotional connection", isLocked: true },
+                    { behavior: "Passionate", description: "Intense and intimate", isLocked: true },
+                    { behavior: "Adventurous", description: "Experimental and bold", isLocked: true },
+                  ].map((item) => (
                     <OptionCard
-                      key={freq.name}
-                      option={freq.name}
-                      isSelected={selections.interactionFrequency === freq.name}
-                      onClick={() => updateSelection("interactionFrequency", freq.name)}
-                      description={freq.desc}
+                      key={item.behavior}
+                      option={item.behavior}
+                      description={item.description}
+                      isSelected={selections.intimateBehavior === item.behavior}
+                      onClick={() => updateSelection("intimateBehavior", item.behavior)}
+                      isLocked={item.isLocked}
                     />
                   ))}
                 </div>
@@ -503,132 +675,178 @@ export default function CreateLoverPage() {
 
       case 7:
         return (
-          <div className="space-y-12">
-            <h2 className="text-4xl font-bold text-white text-center">Summary</h2>
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">隐私设置</h2>
+            <p className="text-gray-300 text-xl mb-12">选择您的角色是公开还是私密</p>
+            <PrivacySelector />
+          </div>
+        )
 
-            <div className="max-w-6xl mx-auto">
-              <div className="bg-[#2a1a34] rounded-xl p-8 border border-[#3a1a44]">
-                <div className="grid grid-cols-5 gap-6 mb-8">
-                  {/* Style */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium mb-3">Style</h3>
-                    <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
-                      <Image
-                        src={`/placeholder.svg?height=100&width=100&text=${selections.style}`}
-                        alt="Style"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <p className="text-white capitalize text-sm">{selections.style}</p>
+      case 8:
+        return (
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-white mb-8">Preview Your AI</h2>
+            <p className="text-gray-300 text-xl mb-12">Here's what you've created!</p>
+
+            <div className="max-w-4xl mx-auto bg-[#2a1a34] rounded-2xl p-8 border border-[#3a1a44]">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-pink-500">
+                    <Image
+                      src={`/placeholder.svg?height=80&width=80&text=${selections.personality?.[0] || "AI"}`}
+                      alt="Character"
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-
-                  {/* Age */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium mb-3">Age</h3>
-                    <div className="w-24 h-24 mx-auto mb-2 bg-[#3a1a44] rounded-lg flex items-center justify-center">
-                      <span className="text-white text-2xl font-bold">20s</span>
-                    </div>
-                    <p className="text-white text-sm">20s</p>
-                  </div>
-
-                  {/* Eyes Color */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium mb-3">Eyes Color</h3>
-                    <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
-                      <Image
-                        src="/placeholder.svg?height=100&width=100&text=Blue+Eyes"
-                        alt="Eyes"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <p className="text-white text-sm">Blue</p>
-                  </div>
-
-                  {/* Hair Style */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium mb-3">Hair Style</h3>
-                    <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
-                      <Image
-                        src="/placeholder.svg?height=100&width=100&text=Short+Hair"
-                        alt="Hair"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <p className="text-white text-sm">Short</p>
-                  </div>
-
-                  {/* Hair Color */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium mb-3">Hair Color</h3>
-                    <div className="w-24 h-24 mx-auto mb-2 bg-amber-600 rounded-lg"></div>
-                    <p className="text-white text-sm">Brunette</p>
+                  <div className="text-left">
+                    <h3 className="text-2xl font-bold text-white">
+                      {`${selections.personality?.[0] || "My"} ${selections.style || "AI"}`}
+                    </h3>
+                    <p className="text-gray-400">{selections.roleType?.[0] || "Friend"}</p>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-5 gap-6">
-                  {/* Body Type */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium mb-3">Body Type</h3>
-                    <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
-                      <Image
-                        src={`/placeholder.svg?height=100&width=100&text=${selections.bodyType}`}
-                        alt="Body"
-                        fill
-                        className="object-cover"
-                      />
+                <div className="flex items-center gap-2">
+                  {selections.isPrivate ? (
+                    <div className="flex items-center gap-2 bg-purple-500/20 px-3 py-1 rounded-full">
+                      <EyeOff className="h-4 w-4 text-purple-400" />
+                      <span className="text-purple-400 text-sm">私密</span>
                     </div>
-                    <p className="text-white text-sm">{selections.bodyType}</p>
-                  </div>
-
-                  {/* Breast Size */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium mb-3">Breast Size</h3>
-                    <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
-                      <Image
-                        src={`/placeholder.svg?height=100&width=100&text=${selections.breastSize}`}
-                        alt="Breast"
-                        fill
-                        className="object-cover"
-                      />
+                  ) : (
+                    <div className="flex items-center gap-2 bg-green-500/20 px-3 py-1 rounded-full">
+                      <Eye className="h-4 w-4 text-green-400" />
+                      <span className="text-green-400 text-sm">公开</span>
                     </div>
-                    <p className="text-white text-sm">{selections.breastSize}</p>
-                  </div>
-
-                  {/* Butt Size */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium mb-3">Butt Size</h3>
-                    <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
-                      <Image
-                        src={`/placeholder.svg?height=100&width=100&text=${selections.buttSize}`}
-                        alt="Butt"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <p className="text-white text-sm">{selections.buttSize}</p>
-                  </div>
-
-                  {/* Personality */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium mb-3">Personality</h3>
-                    <div className="w-24 h-24 mx-auto mb-2 bg-pink-500/20 rounded-lg flex items-center justify-center">
-                      <span className="text-pink-400 text-2xl">😈</span>
-                    </div>
-                    <p className="text-white text-sm">{selections.personality?.[0]}</p>
-                  </div>
-
-                  {/* Relationship */}
-                  <div className="text-center">
-                    <h3 className="text-white font-medium mb-3">Relationship</h3>
-                    <div className="w-24 h-24 mx-auto mb-2 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                      <span className="text-purple-400 text-2xl">💕</span>
-                    </div>
-                    <p className="text-white text-sm">{selections.relationship}</p>
-                  </div>
+                  )}
                 </div>
+              </div>
+
+              <div className="grid grid-cols-5 gap-6 mb-8">
+                {/* Style */}
+                <div className="text-center">
+                  <h3 className="text-white font-medium mb-3">Style</h3>
+                  <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
+                    <Image
+                      src={`/placeholder.svg?height=100&width=100&text=${selections.style?.split(" ")[0]}`}
+                      alt="Style"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="text-white capitalize text-sm">{selections.style}</p>
+                </div>
+
+                {/* Age */}
+                <div className="text-center">
+                  <h3 className="text-white font-medium mb-3">Age</h3>
+                  <div className="w-24 h-24 mx-auto mb-2 bg-[#3a1a44] rounded-lg flex items-center justify-center">
+                    <span className="text-white text-2xl font-bold">20s</span>
+                  </div>
+                  <p className="text-white text-sm">20s</p>
+                </div>
+
+                {/* Eyes Color */}
+                <div className="text-center">
+                  <h3 className="text-white font-medium mb-3">Eyes Color</h3>
+                  <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
+                    <Image
+                      src="/placeholder.svg?height=100&width=100&text=Blue+Eyes"
+                      alt="Eyes"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="text-white text-sm">Blue</p>
+                </div>
+
+                {/* Hair Style */}
+                <div className="text-center">
+                  <h3 className="text-white font-medium mb-3">Hair Style</h3>
+                  <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
+                    <Image
+                      src="/placeholder.svg?height=100&width=100&text=Short+Hair"
+                      alt="Hair"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="text-white text-sm">Short</p>
+                </div>
+
+                {/* Hair Color */}
+                <div className="text-center">
+                  <h3 className="text-white font-medium mb-3">Hair Color</h3>
+                  <div className="w-24 h-24 mx-auto mb-2 bg-amber-600 rounded-lg"></div>
+                  <p className="text-white text-sm">Brunette</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-5 gap-6">
+                {/* Body Type */}
+                <div className="text-center">
+                  <h3 className="text-white font-medium mb-3">Body Type</h3>
+                  <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
+                    <Image
+                      src={`/placeholder.svg?height=100&width=100&text=${selections.bodyType}`}
+                      alt="Body"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="text-white text-sm">{selections.bodyType}</p>
+                </div>
+
+                {/* Breast Size */}
+                <div className="text-center">
+                  <h3 className="text-white font-medium mb-3">Breast Size</h3>
+                  <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
+                    <Image
+                      src={`/placeholder.svg?height=100&width=100&text=${selections.breastSize}`}
+                      alt="Breast"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="text-white text-sm">{selections.breastSize}</p>
+                </div>
+
+                {/* Butt Size */}
+                <div className="text-center">
+                  <h3 className="text-white font-medium mb-3">Butt Size</h3>
+                  <div className="relative w-24 h-24 mx-auto mb-2 rounded-lg overflow-hidden">
+                    <Image
+                      src={`/placeholder.svg?height=100&width=100&text=${selections.buttSize}`}
+                      alt="Butt"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="text-white text-sm">{selections.buttSize}</p>
+                </div>
+
+                {/* Personality */}
+                <div className="text-center">
+                  <h3 className="text-white font-medium mb-3">Personality</h3>
+                  <div className="w-24 h-24 mx-auto mb-2 bg-pink-500/20 rounded-lg flex items-center justify-center">
+                    <span className="text-pink-400 text-2xl">😈</span>
+                  </div>
+                  <p className="text-white text-sm">{selections.personality?.[0]}</p>
+                </div>
+
+                {/* Relationship */}
+                <div className="text-center">
+                  <h3 className="text-white font-medium mb-3">Relationship</h3>
+                  <div className="w-24 h-24 mx-auto mb-2 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                    <span className="text-purple-400 text-2xl">💕</span>
+                  </div>
+                  <p className="text-white text-sm">{selections.relationship}</p>
+                </div>
+              </div>
+
+              {/* 预览欢迎消息 */}
+              <div className="mt-8 bg-[#1a0a24] rounded-lg p-6">
+                <h4 className="text-white font-medium mb-3">首条消息预览：</h4>
+                <p className="text-gray-300 italic">"{getWelcomeMessage()}"</p>
               </div>
             </div>
           </div>
@@ -640,16 +858,20 @@ export default function CreateLoverPage() {
   }
 
   const handleFinalAction = () => {
-    // Check if user has premium features selected
+    // 创建角色
+    const newCharacter = createCharacter()
+    
+    // 检查是否有付费功能
     const hasPremiumFeatures =
       selections.roleType?.some((role) => ["MILF", "Femboy", "Monster", "Teacher"].includes(role)) ||
       ["Step Sister", "Step Mom"].includes(selections.relationship || "") ||
-      selections.breastSize === "Huge"
+      selections.breastSize === "Huge" ||
+      selections.intimateBehavior
 
     if (hasPremiumFeatures) {
       router.push("/premium")
     } else {
-      router.push("/chat/new-character")
+      router.push(`/chat/${newCharacter.id}`)
     }
   }
 
@@ -693,7 +915,7 @@ export default function CreateLoverPage() {
               Previous
             </Button>
 
-            {currentStep === 7 ? (
+            {currentStep === 8 ? (
               <Button
                 onClick={handleFinalAction}
                 className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-16 py-6 rounded-full text-2xl font-medium"
@@ -704,7 +926,7 @@ export default function CreateLoverPage() {
             ) : (
               <Button
                 onClick={nextStep}
-                disabled={currentStep === 7}
+                disabled={currentStep === 8}
                 className={`bg-pink-500 hover:bg-pink-600 text-white px-10 py-4 text-lg ${
                   shakeButton ? "animate-pulse" : ""
                 }`}

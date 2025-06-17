@@ -244,18 +244,21 @@ const creatorsData = {
   }
 }
 
-export default function CreatorProfilePage({ params }: { params: { creatorId: string } }) {
+export default function CreatorProfilePage({ params }: { params: Promise<{ creatorId: string }> }) {
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
+  
+  // 使用React.use()来解包Promise参数
+  const resolvedParams = React.use(params)
 
   // 根据creatorId获取创作者数据
   const creatorData = React.useMemo(() => {
-    return creatorsData[params.creatorId as keyof typeof creatorsData] || null
-  }, [params.creatorId])
+    return creatorsData[resolvedParams.creatorId as keyof typeof creatorsData] || null
+  }, [resolvedParams.creatorId])
 
   const shareUrl = React.useMemo(() => {
-    return `https://lumilove.com/creator/${params.creatorId}`
-  }, [params.creatorId])
+    return `https://lumilove.com/creator/${resolvedParams.creatorId}`
+  }, [resolvedParams.creatorId])
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareUrl)
