@@ -12,60 +12,250 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import React from "react"
 
-// Mock Creator Data (replace with actual data fetching)
-const mockCreatorData = {
-  id: "mei-chan",
-  name: "Mei chan",
-  avatarSrc: "/placeholder.svg?height=128&width=128&text=MC",
-  bannerSrc: "/placeholder.svg?height=300&width=1200",
-  followers: "18503",
-  following: "195",
-  interactions: "89.7M",
-  description:
-    "In my home you will get stories. No taming, characters humiliation, or gender degradation here. My stories aim to stir emotions and feelings, usually through slow-burn narratives or conflicted settings. If you want her, you'll have to fight for her. I prefer strong, humanized female characters I can relate to.",
-  socialLinks: [
-    { platform: "tiktok", url: "#" },
-    { platform: "twitter", url: "#" },
-    { platform: "discord", url: "#" },
-    { platform: "website", url: "#" },
-  ],
-  characters: [
-    {
-      id: 10,
-      name: "Embrace of forgiveness",
-      tags: ["👧 FemalePOV", "🤫 Cheating"],
-      description: "Five years ago, Maddie betrayed you on the fateful...",
-      chatCount: "23.1K",
-      likeCount: "12.5K",
-      imageSrc: "/placeholder.svg?height=400&width=300",
-    },
-    {
-      id: 11,
-      name: "Blake Devis - Out of time",
-      tags: ["👧 FemalePOV", "🤫 Cheating"],
-      description: "曲折、困难、女性角色驱动、浪漫模式...",
-      chatCount: "30.1K",
-      likeCount: "15.2K",
-      imageSrc: "/placeholder.svg?height=400&width=300",
-    },
-  ],
+// 创作者数据
+const creatorsData = {
+  "mei-chan": {
+    id: "mei-chan",
+    name: "Mei chan",
+    avatarSrc: "/avatar/female_01_avatar.png",
+    bannerSrc: "/placeholder.svg?height=300&width=1200",
+    followers: "18503",
+    following: "195",
+    interactions: "89.7M",
+    description: "In my home you will get stories. No taming, characters humiliation, or gender degradation here. My stories aim to stir emotions and feelings, usually through slow-burn narratives or conflicted settings. If you want her, you'll have to fight for her. I prefer strong, humanized female characters I can relate to.",
+    socialLinks: [
+      { platform: "tiktok", url: "#" },
+      { platform: "twitter", url: "#" },
+      { platform: "discord", url: "#" },
+      { platform: "website", url: "#" },
+    ],
+    characters: [
+      {
+        id: 1,
+        name: "Emily",
+        tags: ["👧 Sweet", "💕 Romantic"],
+        description: "A sweet college student who dreams of becoming a writer...",
+        chatCount: "45.2K",
+        likeCount: "23.1K",
+        imageSrc: "/female/female01.png",
+      },
+      {
+        id: 2,
+        name: "Sarah",
+        tags: ["🎮 Gamer", "🤓 Nerdy"],
+        description: "Your gamer girl next door with a competitive streak...",
+        chatCount: "38.7K",
+        likeCount: "19.5K",
+        imageSrc: "/female/female_02.png",
+      },
+      {
+        id: 3,
+        name: "Lily",
+        tags: ["🎨 Artist", "🌸 Gentle"],
+        description: "A gentle soul who expresses herself through art...",
+        chatCount: "35.4K",
+        likeCount: "17.8K",
+        imageSrc: "/female/female_03.jpg",
+      },
+      {
+        id: 4,
+        name: "Isabella",
+        tags: ["💃 Dancer", "✨ Energetic"],
+        description: "A passionate dancer who lights up any room...",
+        chatCount: "42.1K",
+        likeCount: "21.3K",
+        imageSrc: "/female/female_04.png",
+      },
+      {
+        id: 8,
+        name: "Sophia",
+        tags: ["👩‍⚕️ Doctor", "💪 Brave"],
+        description: "A dedicated doctor who saves lives by day and has a secret wild side...",
+        chatCount: "31.7K",
+        likeCount: "204",
+        imageSrc: "/female/female_05.png",
+      },
+      {
+        id: 9,
+        name: "Luna",
+        tags: ["🎨 Artist", "🌙 Mysterious"],
+        description: "A free-spirited artist who paints with passion...",
+        chatCount: "12.5K",
+        likeCount: "193",
+        imageSrc: "/female/female_06.png",
+      },
+      {
+        id: 10,
+        name: "Victoria",
+        tags: ["👩‍⚖️ Lawyer", "💼 Professional"],
+        description: "A powerful attorney who never loses a case...",
+        chatCount: "27.9K",
+        likeCount: "204",
+        imageSrc: "/female/female_07.png",
+      },
+      {
+        id: 11,
+        name: "Emma",
+        tags: ["👩‍🏫 Teacher", "💝 Caring"],
+        description: "A sweet kindergarten teacher with a hidden naughty side...",
+        chatCount: "15.8K",
+        likeCount: "193",
+        imageSrc: "/female/female_08.png",
+      },
+      {
+        id: 12,
+        name: "Olivia",
+        tags: ["🎵 Singer", "🌟 Charming"],
+        description: "An aspiring singer with a voice that touches hearts...",
+        chatCount: "33.2K",
+        likeCount: "16.7K",
+        imageSrc: "/female/female_09.png",
+      }
+    ]
+  },
+  "alexmaster": {
+    id: "alexmaster",
+    name: "AlexMaster",
+    avatarSrc: "/avatar/male_02_avatar.png",
+    bannerSrc: "/placeholder.svg?height=300&width=1200",
+    followers: "25678",
+    following: "156",
+    interactions: "120.3M",
+    description: "Specializing in creating strong, dominant male characters with complex personalities. My characters are more than just their strength - they have depth, vulnerabilities, and compelling backstories that make them truly unforgettable.",
+    socialLinks: [
+      { platform: "twitter", url: "#" },
+      { platform: "discord", url: "#" },
+    ],
+    characters: [
+      {
+        id: 5,
+        name: "Alexander",
+        tags: ["💪 Alpha", "👔 CEO"],
+        description: "A powerful CEO who commands respect in the boardroom...",
+        chatCount: "67.8K",
+        likeCount: "34.2K",
+        imageSrc: "/male/male_01.png",
+      },
+      {
+        id: 13,
+        name: "Dominic",
+        tags: ["🕴️ Mafia Boss", "🌙 Mysterious"],
+        description: "A dangerous man with a soft spot for you. He rules the underworld...",
+        chatCount: "45.2K",
+        likeCount: "13.0K",
+        imageSrc: "/male/male_04.png",
+      },
+      {
+        id: 16,
+        name: "Gabriel",
+        tags: ["👮 Police", "🛡️ Protective"],
+        description: "A dedicated cop who breaks all his own rules for you...",
+        chatCount: "19.8K",
+        likeCount: "13.0K",
+        imageSrc: "/male/male_7.png.png",
+      }
+    ]
+  },
+  "nightstalker": {
+    id: "nightstalker",
+    name: "NightStalker",
+    avatarSrc: "/avatar/male_02_avatar.png",
+    bannerSrc: "/placeholder.svg?height=300&width=1200",
+    followers: "19234",
+    following: "178",
+    interactions: "95.6M",
+    description: "Creating gentle, caring male characters who show that true strength lies in kindness. My characters prove that you don't need to be dominant to be attractive - sometimes the softest hearts make the strongest connections.",
+    socialLinks: [
+      { platform: "twitter", url: "#" },
+      { platform: "discord", url: "#" },
+    ],
+    characters: [
+      {
+        id: 6,
+        name: "Jake",
+        tags: ["📚 Writer", "🎭 Artistic"],
+        description: "A sensitive writer who sees the beauty in everything...",
+        chatCount: "28.7K",
+        likeCount: "9.5K",
+        imageSrc: "/male/male_02.png",
+      },
+      {
+        id: 14,
+        name: "Marcus",
+        tags: ["👨‍⚕️ Doctor", "💖 Caring"],
+        description: "A brilliant surgeon who saves lives. His gentle touch heals...",
+        chatCount: "28.7K",
+        likeCount: "9.5K",
+        imageSrc: "/male/male_05.png",
+      },
+      {
+        id: 17,
+        name: "Kai",
+        tags: ["👨‍🍳 Chef", "😊 Playful"],
+        description: "A talented chef who cooks with passion...",
+        chatCount: "22.4K",
+        likeCount: "9.5K",
+        imageSrc: "/male/male_8.png.png",
+      }
+    ]
+  },
+  "roadrebel": {
+    id: "roadrebel",
+    name: "RoadRebel",
+    avatarSrc: "/avatar/male_02_avatar.png",
+    bannerSrc: "/placeholder.svg?height=300&width=1200",
+    followers: "17856",
+    following: "143",
+    interactions: "82.4M",
+    description: "Adventure and excitement are at the heart of my characters. From musicians to entrepreneurs, each character brings their own brand of thrill to your story. Get ready for a wild ride with personalities that never play it safe.",
+    socialLinks: [
+      { platform: "twitter", url: "#" },
+      { platform: "discord", url: "#" },
+    ],
+    characters: [
+      {
+        id: 7,
+        name: "Ethan",
+        tags: ["🏍️ Biker", "🌟 Rebel"],
+        description: "A free-spirited biker who lives life on his own terms...",
+        chatCount: "33.1K",
+        likeCount: "7.6K",
+        imageSrc: "/male/male_03.png",
+      },
+      {
+        id: 15,
+        name: "Ryan",
+        tags: ["🎸 Musician", "😈 Badboy"],
+        description: "A rockstar whose music speaks to your soul...",
+        chatCount: "33.1K",
+        likeCount: "7.6K",
+        imageSrc: "/male/male_06.png",
+      },
+      {
+        id: 18,
+        name: "Xavier",
+        tags: ["💰 Billionaire", "🧊 Cold"],
+        description: "A tech mogul with a cold exterior but a burning desire...",
+        chatCount: "41.6K",
+        likeCount: "7.6K",
+        imageSrc: "/male/male_9.png.png",
+      }
+    ]
+  }
 }
 
-export default async function CreatorProfilePage({ params }: { params: Promise<{ creatorId: string }> }) {
-  const { creatorId } = await params;
-
+export default function CreatorProfilePage({ params }: { params: { creatorId: string } }) {
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
 
-  // 在实际应用中，这里应该根据 creatorId 获取数据
+  // 根据creatorId获取创作者数据
   const creatorData = React.useMemo(() => {
-    // 这里可以添加数据获取逻辑
-    return mockCreatorData
-  }, [creatorId])
+    return creatorsData[params.creatorId as keyof typeof creatorsData] || null
+  }, [params.creatorId])
 
   const shareUrl = React.useMemo(() => {
-    return `https://lumilove.com/creator/${creatorId}`
-  }, [creatorId])
+    return `https://lumilove.com/creator/${params.creatorId}`
+  }, [params.creatorId])
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareUrl)
@@ -122,7 +312,7 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-3 mt-4 md:mt-0">
+            <div className="flex gap-2 mt-4 md:mt-0">
               <Button className="bg-pink-500 hover:bg-pink-600 text-white">
                 <UserPlus className="h-4 w-4 mr-2" /> Follow
               </Button>
@@ -144,7 +334,7 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
           </div>
 
           {/* Character Tabs */}
-          <Tabs defaultValue="characters" className="w-full">
+          <Tabs defaultValue="characters">
             <div className="flex justify-between items-center mb-4">
               <TabsList className="bg-[#1a0a24] p-1 rounded-full border border-[#3a1a44]">
                 <TabsTrigger
@@ -166,7 +356,7 @@ export default async function CreatorProfilePage({ params }: { params: Promise<{
                   Collections
                 </TabsTrigger>
               </TabsList>
-              <div className="flex items-center space-x-2">
+              <div className="flex gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button

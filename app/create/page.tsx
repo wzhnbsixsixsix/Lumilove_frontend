@@ -29,15 +29,9 @@ export default function CreatePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Character and selection states
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(
-    null
-  );
-  const [selectedGender, setSelectedGender] = useState<"male" | "female">(
-    "male"
-  );
-  const [selectedStyle, setSelectedStyle] = useState<"realistic" | "anime">(
-    "realistic"
-  );
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const [selectedGender, setSelectedGender] = useState<"male" | "female">("male");
+  const [selectedStyle, setSelectedStyle] = useState<"realistic" | "anime">("realistic");
   const [selectedScene, setSelectedScene] = useState<string | null>(null);
   const [selectedClothing, setSelectedClothing] = useState<string | null>(null);
   const [selectedPose, setSelectedPose] = useState<string | null>(null);
@@ -46,35 +40,16 @@ export default function CreatePage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [recentCharacters, setRecentCharacters] = useState<RecentChat[]>([]);
 
   // Dialog states
   const [openDialog, setOpenDialog] = useState<string | null>(null);
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
-  const [recentChats, setRecentChats] = useState<RecentChat[]>([]);
 
-  // Mock data - Recent chats
   useEffect(() => {
-    // Simulating fetching recent chat characters
-    setRecentChats([
-      {
-        id: "ethan",
-        name: "Ethan",
-        imageSrc: "/placeholder.svg?height=80&width=80&text=E",
-        gender: "male",
-      },
-      {
-        id: "olivia",
-        name: "Olivia",
-        imageSrc: "/placeholder.svg?height=80&width=80&text=O",
-        gender: "female",
-      },
-      {
-        id: "alex",
-        name: "Alex",
-        imageSrc: "/placeholder.svg?height=80&width=80&text=A",
-        gender: "male",
-      },
-    ]);
+    // 从localStorage获取最近的聊天记录
+    const chatHistory = JSON.parse(localStorage.getItem('recentChats') || '[]');
+    setRecentCharacters(chatHistory.slice(0, 3)); // 只取前3个最近的聊天
   }, []);
 
   // Scene options with thumbnails
@@ -253,7 +228,7 @@ export default function CreatePage() {
                 </div>
               </div>
 
-              {recentChats.map((character) => (
+              {recentCharacters.map((character) => (
                 <div
                   key={character.id}
                   className={`w-28 h-28 rounded-lg overflow-hidden cursor-pointer relative ${

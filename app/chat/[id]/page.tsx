@@ -57,16 +57,110 @@ interface Message {
   isThinking?: boolean; // 新增：标识是否正在思考
 }
 
+interface UiState {
+  isTyping: boolean;
+  isFavorite: boolean;
+  isFollowing: boolean;
+  showShareDialog: boolean;
+  showProfileModal: boolean;
+  showSubscriptionModal: boolean;
+  showFullImage: boolean;
+  showReplyOptions: boolean;
+  showRecommendation: boolean;
+  showMobileSidebar: boolean;
+  showMobileChatList: boolean;
+  showChatList: boolean;
+  showCallDialog: boolean;
+  showClearDialog: boolean;
+  isMuted: boolean;
+  isClearingHistory: boolean;
+  isPlaying: number | null;
+  replyType: string;
+}
+
 export default function ChatPage() {
-  // 使用 use 解包 params
-
-  const params = useParams();
-  const chatId = params.id as string;
   const router = useRouter();
+  const params = useParams();
+  const chatId = typeof params.id === 'string' ? params.id : '';
+  
+  // 将所有UI状态合并到一个对象中
+  const [uiState, setUiState] = useState<UiState>({
+    isTyping: false,
+    isFavorite: false,
+    isFollowing: false,
+    showShareDialog: false,
+    showProfileModal: false,
+    showSubscriptionModal: false,
+    showFullImage: false,
+    showReplyOptions: false,
+    showRecommendation: false,
+    showMobileSidebar: false,
+    showMobileChatList: false,
+    showChatList: true,
+    showCallDialog: false,
+    showClearDialog: false,
+    isMuted: false,
+    isClearingHistory: false,
+    isPlaying: null,
+    replyType: "text"
+  });
 
-  // 修改 messages 状态定义
+  // 聊天相关状态
   const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [selectedImage, setSelectedImage] = useState("");
   const [token, setToken] = useState<string | null>(null);
+
+  // 更新UI状态的辅助函数
+  const updateUiState = (updates: Partial<UiState>) => {
+    setUiState(prev => ({ ...prev, ...updates }));
+  };
+
+  // 保存聊天历史到localStorage
+  useEffect(() => {
+    if (!chatId) return;
+    
+    const character = characters[chatId as keyof typeof characters];
+    if (!character) return;
+
+    // 获取现有的聊天历史
+    const chatHistory = JSON.parse(localStorage.getItem('recentChats') || '[]');
+    
+    // 创建新的聊天记录
+    const newChat = {
+      id: chatId,
+      name: character.name,
+      imageSrc: character.images[0],
+      timestamp: new Date().toISOString(),
+      gender: character.occupation.toLowerCase().includes('businessman') ? 'male' : 'female'
+    };
+
+    // 检查是否已存在该角色的聊天记录
+    const existingIndex = chatHistory.findIndex((chat: any) => chat.id === chatId);
+    if (existingIndex !== -1) {
+      chatHistory.splice(existingIndex, 1);
+    }
+    
+    chatHistory.unshift(newChat);
+    const updatedHistory = chatHistory.slice(0, 10);
+    localStorage.setItem('recentChats', JSON.stringify(updatedHistory));
+  }, [chatId]);
+
+  // 处理分享角色
+  const handleShareCharacter = () => {
+    updateUiState({ showShareDialog: true });
+  };
+
+  // 处理订阅按钮点击
+  const handleSubscriptionButtonClick = () => {
+    updateUiState({ showSubscriptionModal: true });
+  };
+
+  // 处理图片点击
+  const handleImageClick = (imageSrc: string) => {
+    setSelectedImage(imageSrc);
+    updateUiState({ showFullImage: true });
+  };
 
   // Character data based on ID
   const characters = {
@@ -495,12 +589,8 @@ const handleQuickReply = (reply: string) => {
     }
   };
 
-  const [inputValue, setInputValue] = useState("");
   const [replyType, setReplyType] = useState("text");
-  const [showReplyOptions, setShowReplyOptions] = useState(false);
   const [showRecommendation, setShowRecommendation] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false);
   const [isPlaying, setIsPlaying] = useState<number | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -547,7 +637,7 @@ const handleQuickReply = (reply: string) => {
       lastMessage: "He chuckles softly...",
       imageSrc: "/avatar/female_01_avatar.png",
       timestamp: "15:30",
-      unread: params.id !== "1",
+      unread: chatId !== "1",
     },
     {
       id: 2,
@@ -555,7 +645,7 @@ const handleQuickReply = (reply: string) => {
       lastMessage: "I've been thinking about you...",
       imageSrc: "/avatar/alexander_avatar.png",
       timestamp: "Yesterday",
-      unread: params.id !== "2",
+      unread: chatId !== "2",
     },
     {
       id: 3,
@@ -563,7 +653,7 @@ const handleQuickReply = (reply: string) => {
       lastMessage: "Want to meet tonight?",
       imageSrc: "/avatar/male_02_avatar.png",
       timestamp: "Monday",
-      unread: params.id !== "3",
+      unread: chatId !== "3",
     },
     {
       id: 4,
@@ -571,7 +661,7 @@ const handleQuickReply = (reply: string) => {
       lastMessage: "I have a proposal for you...",
       imageSrc: "/avatar/female_02_avatar.png",
       timestamp: "Yesterday",
-      unread: params.id !== "4",
+      unread: chatId !== "4",
     },
     {
       id: 5,
@@ -579,7 +669,7 @@ const handleQuickReply = (reply: string) => {
       lastMessage: "Can you help me with this?",
       imageSrc: "/avatar/female_03_avatar.png",
       timestamp: "Tuesday",
-      unread: params.id !== "5",
+      unread: chatId !== "5",
     },
     {
       id: 6,
@@ -587,7 +677,7 @@ const handleQuickReply = (reply: string) => {
       lastMessage: "My husband is away again...",
       imageSrc: "/avatar/female_04_avatar.png",
       timestamp: "Wednesday",
-      unread: params.id !== "6",
+      unread: chatId !== "6",
     },
   ];
 
@@ -670,20 +760,10 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
     }
   };
 
-  const handleShareCharacter = () => {
-    setShowShareDialog(true);
-  };
-
   const handleProfileClick = () => {
-    setShowProfileModal(true);
+    updateUiState({ showProfileModal: true });
   };
 
-  const handleSubscriptionButtonClick = () => {
-    setShowProfileModal(false);
-    setShowSubscriptionModal(true);
-  };
-
-  // Update the handleCallButtonClick function to make it fullscreen
   const handleCallButtonClick = () => {
     // Select a random phrase for the call
     const randomPhrase =
@@ -795,7 +875,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
   // Get a random character ID that's different from the current one
   const getRandomCharacterId = () => {
     const characterIds = Object.keys(characters).filter(
-      (id) => id !== params.id
+      (id) => id !== chatId.toString()
     );
     const randomIndex = Math.floor(Math.random() * characterIds.length);
     return characterIds[randomIndex];
@@ -921,9 +1001,9 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
       </div>
 
       {/* Mobile Sidebar Overlay */}
-      {showMobileSidebar && (
+      {uiState.showMobileSidebar && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setShowMobileSidebar(false)} />
+          <div className="fixed inset-0 bg-black/50" onClick={() => updateUiState({ showMobileSidebar: false })} />
           <div className="fixed left-0 top-0 h-full w-64 bg-[#120518] border-r border-[#3a1a44] z-10">
             <Sidebar />
           </div>
@@ -932,7 +1012,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
 
       <div className="flex flex-1 h-screen overflow-hidden">
         {/* Left sidebar - Chat list */}
-        <div className={`${showMobileChatList ? 'block' : 'hidden'} ${showChatList ? 'sm:block' : 'sm:hidden'} w-80 lg:w-96 xl:w-80 bg-[#120518] border-r border-[#3a1a44] flex flex-col h-full md:max-w-xs lg:max-w-sm xl:max-w-none transition-all duration-300`}>
+        <div className={`${uiState.showMobileChatList ? 'block' : 'hidden'} ${uiState.showChatList ? 'sm:block' : 'sm:hidden'} w-80 lg:w-96 xl:w-80 bg-[#120518] border-r border-[#3a1a44] flex flex-col h-full md:max-w-xs lg:max-w-sm xl:max-w-none transition-all duration-300`}>
           <div className="p-4 lg:p-6 border-b border-[#3a1a44]">
             <div className="flex items-center justify-between">
               <h2 className="text-xl lg:text-2xl font-bold">Chat</h2>
@@ -940,15 +1020,15 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                 {/* 桌面端缩放按钮 */}
                 <button
                   className="hidden sm:flex p-2 rounded-full hover:bg-[#2a1a34] items-center justify-center"
-                  onClick={() => setShowChatList(!showChatList)}
-                  title={showChatList ? "隐藏聊天列表" : "显示聊天列表"}
+                  onClick={() => updateUiState({ showChatList: !uiState.showChatList })}
+                  title={uiState.showChatList ? "隐藏聊天列表" : "显示聊天列表"}
                 >
                   <ChevronLeft className="h-5 w-5 text-gray-400" />
                 </button>
                 {/* 移动端关闭按钮 */}
                 <button
                   className="p-2 rounded-full hover:bg-[#2a1a34] sm:hidden"
-                  onClick={() => setShowMobileChatList(false)}
+                  onClick={() => updateUiState({ showMobileChatList: false })}
                 >
                   <X className="h-5 w-5 text-gray-400" />
                 </button>
@@ -961,7 +1041,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                 href={`/chat/${chat.id}`}
                 key={chat.id}
                 className={`flex items-start p-3 lg:p-4 hover:bg-[#2a1a34] transition-colors rounded-xl mb-2 ${
-                  chat.id.toString() === params.id ? "bg-[#2a1a34]" : ""
+                  chat.id === chatId ? "bg-[#2a1a34]" : ""
                 }`}
               >
                 <div className="relative mr-3 lg:mr-4">
@@ -1001,11 +1081,11 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
 
 
         {/* 当聊天列表隐藏时的展开按钮 */}
-        {!showChatList && (
+        {!uiState.showChatList && (
           <div className="hidden sm:flex items-center justify-center w-8 bg-[#120518] border-r border-[#3a1a44] hover:bg-[#1a0a24] transition-colors">
             <button
               className="p-2 rounded-full hover:bg-[#2a1a34] transition-all duration-300"
-              onClick={() => setShowChatList(true)}
+              onClick={() => updateUiState({ showChatList: true })}
               title="显示聊天列表"
             >
               <ChevronRight className="h-5 w-5 text-gray-400" />
@@ -1022,14 +1102,14 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
               <div className="flex sm:hidden mr-2">
                 <button
                   className="p-2 rounded-full hover:bg-[#2a1a34] mr-1"
-                  onClick={() => setShowMobileSidebar(true)}
+                  onClick={() => updateUiState({ showMobileSidebar: true })}
                   title="打开导航菜单"
                 >
                   <Menu className="h-5 w-5 text-gray-400" />
                 </button>
                 <button
                   className="p-2 rounded-full hover:bg-[#2a1a34]"
-                  onClick={() => setShowMobileChatList(true)}
+                  onClick={() => updateUiState({ showMobileChatList: true })}
                   title="显示聊天列表"
                 >
                   <MessageSquare className="h-5 w-5 text-gray-400" />
@@ -1054,7 +1134,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
               {/* 添加清除聊天记录按钮 */}
               <button
                 className="p-3 rounded-full hover:bg-[#2a1a34] text-gray-400 hover:text-white"
-                onClick={() => setShowClearDialog(true)}
+                onClick={() => updateUiState({ showClearDialog: true })}
                 title="清除聊天记录"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1063,7 +1143,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
               </button>
               <button
                 className="p-3 rounded-full hover:bg-[#2a1a34]"
-                onClick={handleCallButtonClick}
+                onClick={() => updateUiState({ showCallDialog: true })}
               >
                 <Phone className="h-6 w-6 text-gray-400" />
               </button>
@@ -1092,7 +1172,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                         onClick={() => handleAudioPlay(message.id)}
                         className="bg-pink-500 text-white rounded-full p-1.5 mr-2"
                       >
-                        {isPlaying === message.id ? (
+                        {uiState.isPlaying === message.id ? (
                           <Pause className="h-4 w-4" />
                         ) : (
                           <Play className="h-4 w-4" />
@@ -1150,7 +1230,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
           </div>
 
           {/* Recommendation bubble */}
-          {showRecommendation && recommendedCharacter && (
+          {uiState.showRecommendation && recommendedCharacter && (
             <div className="relative">
               <div className="absolute bottom-20 right-6 bg-[#1a0a24] border border-pink-500 rounded-xl p-5 max-w-sm animate-pulse shadow-lg shadow-pink-500/20">
                 <div className="flex items-start space-x-4">
@@ -1193,7 +1273,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                   </div>
                   <button
                     className="text-gray-400 hover:text-white"
-                    onClick={() => setShowRecommendation(false)}
+                    onClick={() => updateUiState({ showRecommendation: false })}
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -1306,7 +1386,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
             </div>
 
             {/* Reply type selector */}
-            {showReplyOptions && (
+            {uiState.showReplyOptions && (
               <div className="mt-3 p-5 bg-[#1a0a24] rounded-xl border border-[#3a1a44]">
                 <div className="space-y-4">
                   <div className="flex items-center space-x-4">
@@ -1437,13 +1517,13 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                 variant="outline"
                 size="sm"
                 className={`text-sm px-4 py-2 h-auto ${
-                  isFollowing
+                  uiState.isFollowing
                     ? "bg-[#2a1a34] hover:bg-[#3a1a44]"
                     : "bg-pink-500 hover:bg-pink-600"
                 }`}
-                onClick={() => setIsFollowing(!isFollowing)}
+                onClick={() => updateUiState({ isFollowing: !uiState.isFollowing })}
               >
-                {isFollowing ? "Following" : "+ Follow"}
+                {uiState.isFollowing ? "Following" : "+ Follow"}
               </Button>
             </div>
 
@@ -1461,11 +1541,11 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
               </div>
               <div className="flex items-center">
                 <span className="text-sm mr-2">{character.followers}</span>
-                <button onClick={() => setIsFavorite(!isFavorite)}>
+                <button onClick={() => updateUiState({ isFavorite: !uiState.isFavorite })}>
                   <Heart
                     className={cn(
                       "h-4 w-4",
-                      isFavorite
+                      uiState.isFavorite
                         ? "text-pink-500 fill-pink-500"
                         : "text-gray-400"
                     )}
@@ -1574,7 +1654,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
       </div>
 
       {/* Share Character Dialog */}
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+      <Dialog open={uiState.showShareDialog} onOpenChange={() => updateUiState({ showShareDialog: false })}>
         <DialogContent className="bg-[#1a0a24] border-[#3a1a44] text-white">
           <DialogHeader>
             <DialogTitle className="text-xl">
@@ -1643,7 +1723,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
             <Button
               variant="outline"
               className="text-base"
-              onClick={() => setShowShareDialog(false)}
+              onClick={() => updateUiState({ showShareDialog: false })}
             >
               Close
             </Button>
@@ -1652,7 +1732,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
       </Dialog>
 
       {/* Character Profile Modal */}
-      <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+      <Dialog open={uiState.showProfileModal} onOpenChange={() => updateUiState({ showProfileModal: false })}>
         <DialogContent className="bg-[#1a0a24] border-[#3a1a44] text-white max-w-3xl">
           <DialogHeader>
             <DialogTitle className="text-center text-2xl">
@@ -1693,7 +1773,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                 <Heart
                   className={cn(
                     "h-5 w-5",
-                    isFavorite ? "text-pink-500 fill-pink-500" : "text-gray-400"
+                    uiState.isFavorite ? "text-pink-500 fill-pink-500" : "text-gray-400"
                   )}
                 />
               </div>
@@ -1758,8 +1838,8 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
 
       {/* Subscription Modal */}
       <Dialog
-        open={showSubscriptionModal}
-        onOpenChange={setShowSubscriptionModal}
+        open={uiState.showSubscriptionModal}
+        onOpenChange={() => updateUiState({ showSubscriptionModal: false })}
       >
         <DialogContent className="bg-[#1a0a24] border-[#3a1a44] text-white">
           <DialogHeader>
@@ -1886,7 +1966,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setShowSubscriptionModal(false)}
+              onClick={() => updateUiState({ showSubscriptionModal: false })}
             >
               Maybe Later
             </Button>
@@ -1896,10 +1976,10 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
 
       {/* Call Dialog */}
       <Dialog
-        open={showCallDialog}
+        open={uiState.showCallDialog}
         onOpenChange={(open) => {
           if (!open) handleEndCall();
-          setShowCallDialog(open);
+          updateUiState({ showCallDialog: open });
         }}
       >
         <DialogContent className="bg-[#0e0314]/95 backdrop-blur-md border border-[#3a1a44] p-0 max-w-5xl w-[90vw] h-[80vh] overflow-hidden rounded-xl">
@@ -2020,13 +2100,13 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
 
                 <button
                   className={`${
-                    isMuted ? "bg-gray-600" : "bg-[#2a1a34] hover:bg-[#3a1a44]"
+                    uiState.isMuted ? "bg-gray-600" : "bg-[#2a1a34] hover:bg-[#3a1a44]"
                   } h-20 w-20 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 border-2 ${
-                    isMuted ? "border-gray-500" : "border-[#4a2a54]"
+                    uiState.isMuted ? "border-gray-500" : "border-[#4a2a54]"
                   }`}
-                  onClick={() => setIsMuted(!isMuted)}
+                  onClick={() => updateUiState({ isMuted: !uiState.isMuted })}
                 >
-                  {isMuted ? (
+                  {uiState.isMuted ? (
                     <MicOff className="h-10 w-10 text-white" />
                   ) : (
                     <Mic className="h-10 w-10 text-white" />
@@ -2048,7 +2128,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
       </Dialog>
 
       {/* 清除聊天记录确认对话框 */}
-      <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+      <Dialog open={uiState.showClearDialog} onOpenChange={() => updateUiState({ showClearDialog: false })}>
         <DialogContent className="bg-[#1a0a24] border-[#3a1a44] text-white">
           <DialogHeader>
             <DialogTitle className="text-xl">清除聊天记录</DialogTitle>
@@ -2059,17 +2139,17 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
           <DialogFooter className="flex gap-3">
             <Button
               variant="outline"
-              onClick={() => setShowClearDialog(false)}
-              disabled={isClearingHistory}
+              onClick={() => updateUiState({ showClearDialog: false })}
+              disabled={uiState.isClearingHistory}
             >
               取消
             </Button>
             <Button
               className="bg-red-500 hover:bg-red-600"
               onClick={handleClearChatHistory}
-              disabled={isClearingHistory}
+              disabled={uiState.isClearingHistory}
             >
-              {isClearingHistory ? "清除中..." : "确认清除"}
+              {uiState.isClearingHistory ? "清除中..." : "确认清除"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -92,7 +92,7 @@ export default function CharacterCard({ character }: { character: Character }) {
         {/* 创作者信息 */}
         <div className="mt-2 flex items-center">
           <Link 
-            href={`/creator/${creatorName}`}
+            href={`/creator/${character.creator.id}`}
             className="flex items-center text-xs text-gray-400 hover:text-pink-400"
           >
             <div className="w-5 h-5 rounded-full bg-gray-600 mr-1 flex items-center justify-center">

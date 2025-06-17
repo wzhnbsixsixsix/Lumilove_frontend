@@ -120,11 +120,13 @@ const mapTags = (tags: string[], gender: 'guys' | 'girls'): string[] => {
 }
 
 export default function Home() {
-  const [activeGender, setActiveGender] = useState<"guys" | "girls">("guys")
-  const [activeTag, setActiveTag] = useState("For You")
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [activeGender, setActiveGender] = useState<'guys' | 'girls'>('guys')
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [recentChatHistory, setRecentChatHistory] = useState<any[]>([])
+  const [activeTag, setActiveTag] = useState("For You")
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -158,6 +160,10 @@ export default function Home() {
             console.log('Token verification successful')
             setIsLoggedIn(true)
             setUser(JSON.parse(userData))
+            
+            // 获取最近的聊天记录
+            const chatHistory = JSON.parse(localStorage.getItem('recentChats') || '[]')
+            setRecentChatHistory(chatHistory.slice(0, 3)) // 只取前3个
           } else {
             console.log('Token verification failed, clearing auth data')
             handleLogout()
@@ -457,7 +463,7 @@ export default function Home() {
   ]
 
   // Determine if we should show recent chats (in a real app, this would be based on user data)
-  const hasRecentChats = recentChats.length > 0
+  const hasRecentChats = recentChatHistory.length > 0
 
   return (
     <div className="flex min-h-screen">
@@ -515,7 +521,7 @@ export default function Home() {
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-3">Recent chat</h2>
               <div className="flex space-x-5">
-                {recentChats.map((chat) => (
+                {recentChatHistory.map((chat) => (
                   <Link href={`/chat/${chat.id}`} key={chat.id} className="text-center">
                     <div className="h-20 w-20 rounded-full overflow-hidden mx-auto mb-2 border-2 border-pink-500">
                       <Image
