@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react"
 import { buildApiUrl, API_CONFIG } from "@/lib/config"
+import { getCharacterById, getCharacterAvatar, getCharacterName } from "@/lib/characters"
 
 interface User {
   username: string;
@@ -446,23 +447,7 @@ export default function Home() {
   ]
 
   // Mock data for recent chats (only shown if there are any)
-  const recentChats = [
-    {
-      id: 1,
-      name: "Ethan",
-      imageSrc: "/avatar/female_03_avatar.png",
-    },
-    {
-      id: 5,
-      name: "Makenzie",
-      imageSrc: "/avatar/female_04_avatar.png",
-    },
-    {
-      id: 2,
-      name: "Alexander",
-      imageSrc: "/avatar/alexander_avatar.png",//首页explore的recent chat的头像
-    },
-  ]
+  // Recent chats now come from localStorage and use correct character data
 
   // Determine if we should show recent chats (in a real app, this would be based on user data)
   const hasRecentChats = recentChatHistory.length > 0
@@ -530,20 +515,27 @@ export default function Home() {
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-3">Recent chat</h2>
               <div className="flex space-x-5">
-                {recentChatHistory.map((chat) => (
-                  <Link href={`/chat/${chat.id}`} key={chat.id} className="text-center">
-                    <div className="h-20 w-20 rounded-full overflow-hidden mx-auto mb-2 border-2 border-pink-500">
-                      <Image
-                        src={chat.imageSrc || "/placeholder.svg"}
-                        alt={chat.name}
-                        width={80}
-                        height={80}
-                        className="object-cover"
-                      />
-                    </div>
-                    <span className="text-base">{chat.name}</span>
-                  </Link>
-                ))}
+                {recentChatHistory.map((chat) => {
+                  // 使用统一的角色数据获取正确的头像
+                  const character = getCharacterById(chat.id);
+                  const avatarSrc = character?.avatarSrc || chat.imageSrc || getCharacterAvatar(chat.id);
+                  const characterName = character?.name || chat.name || getCharacterName(chat.id);
+                  
+                  return (
+                    <Link href={`/chat/${chat.id}`} key={chat.id} className="text-center">
+                      <div className="h-20 w-20 rounded-full overflow-hidden mx-auto mb-2 border-2 border-pink-500">
+                        <Image
+                          src={avatarSrc}
+                          alt={characterName}
+                          width={80}
+                          height={80}
+                          className="object-cover"
+                        />
+                      </div>
+                      <span className="text-base">{characterName}</span>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}

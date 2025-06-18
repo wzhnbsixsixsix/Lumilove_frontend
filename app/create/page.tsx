@@ -9,6 +9,7 @@ import { Dice5, Plus, Check, X, Upload, Download, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Sidebar from "@/components/sidebar";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { getCharacterById, getCharacterAvatar, getCharacterName } from "@/lib/characters";
 
 interface Character {
   id: string;
@@ -228,37 +229,45 @@ export default function CreatePage() {
                 </div>
               </div>
 
-              {recentCharacters.map((character) => (
-                <div
-                  key={character.id}
-                  className={`w-28 h-28 rounded-lg overflow-hidden cursor-pointer relative ${
-                    selectedCharacter === character.id
-                      ? "ring-2 ring-pink-500"
-                      : ""
-                  }`}
-                  onClick={() =>
-                    handleCharacterSelect(character.id, character.gender)
-                  }
-                >
-                  <Image
-                    src={character.imageSrc || "/placeholder.svg"}
-                    alt={character.name}
-                    width={112}
-                    height={112}
-                    className="object-cover"
-                  />
-                  {selectedCharacter === character.id && (
-                    <div className="absolute bottom-1 right-1 bg-pink-500 rounded-full h-6 w-6 flex items-center justify-center">
-                      <Check className="h-4 w-4 text-white" />
+              {recentCharacters.map((character) => {
+                // 使用统一的角色数据获取正确的头像
+                const characterData = getCharacterById(character.id);
+                const avatarSrc = characterData?.avatarSrc || character.imageSrc || getCharacterAvatar(character.id);
+                const characterName = characterData?.name || character.name || getCharacterName(character.id);
+                const characterGender = characterData?.gender || character.gender || 'male';
+                
+                return (
+                  <div
+                    key={character.id}
+                    className={`w-28 h-28 rounded-lg overflow-hidden cursor-pointer relative ${
+                      selectedCharacter === character.id
+                        ? "ring-2 ring-pink-500"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      handleCharacterSelect(character.id, characterGender)
+                    }
+                  >
+                    <Image
+                      src={avatarSrc}
+                      alt={characterName}
+                      width={112}
+                      height={112}
+                      className="object-cover"
+                    />
+                    {selectedCharacter === character.id && (
+                      <div className="absolute bottom-1 right-1 bg-pink-500 rounded-full h-6 w-6 flex items-center justify-center">
+                        <Check className="h-4 w-4 text-white" />
+                      </div>
+                    )}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 py-1 px-2">
+                      <p className="text-xs text-white text-center">
+                        {characterName}
+                      </p>
                     </div>
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 py-1 px-2">
-                    <p className="text-xs text-white text-center">
-                      {character.name}
-                    </p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

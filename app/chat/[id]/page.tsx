@@ -126,11 +126,11 @@ export default function ChatPage() {
     // 获取现有的聊天历史
     const chatHistory = JSON.parse(localStorage.getItem('recentChats') || '[]');
     
-    // 创建新的聊天记录
+    // 创建新的聊天记录，使用统一的头像资源
     const newChat = {
       id: chatId,
       name: character.name,
-      imageSrc: character.images[0],
+      imageSrc: character.images[0], // 保持原有的主图片
       timestamp: new Date().toISOString(),
       gender: character.occupation.toLowerCase().includes('businessman') ? 'male' : 'female'
     };
