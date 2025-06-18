@@ -171,6 +171,7 @@ export default function ProfilePage() {
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn")
     localStorage.removeItem("user")
+    localStorage.removeItem("token")
     router.push("/login")
   }
 

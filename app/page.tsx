@@ -187,6 +187,7 @@ export default function Home() {
     console.log('Logging out, clearing auth data')
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('isLoggedIn')
     setIsLoggedIn(false)
     setUser(null)
   }
@@ -481,16 +482,16 @@ export default function Home() {
               />
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/profile">
-                <div className="flex items-center space-x-2 bg-[#1a0a24] px-3 py-1 rounded-full text-sm hover:bg-[#2a1a34] transition-colors cursor-pointer">
-                  <div className="h-8 w-8 rounded-full overflow-hidden">
-                    <Image src={user?.avatar || "/placeholder.svg?height=128&width=128&text=U"} alt="User" width={32} height={32} />
-                  </div>
-                  <div className="bg-[#2a1a34] px-3 py-1 rounded-full text-sm">Free Plan ↗</div>
-                </div>
-              </Link>
               {isLoggedIn ? (
                 <>
+                  <Link href="/profile">
+                    <div className="flex items-center space-x-2 bg-[#1a0a24] px-3 py-1 rounded-full text-sm hover:bg-[#2a1a34] transition-colors cursor-pointer">
+                      <div className="h-8 w-8 rounded-full overflow-hidden">
+                        <Image src={user?.avatar || "/placeholder.svg?height=128&width=128&text=U"} alt="User" width={32} height={32} />
+                      </div>
+                      <div className="bg-[#2a1a34] px-3 py-1 rounded-full text-sm">Free Plan ↗</div>
+                    </div>
+                  </Link>
                   <span className="text-white">Welcome, {user?.username}</span>
                   <Button
                     onClick={handleLogout}
