@@ -187,8 +187,10 @@ export default function Home() {
     console.log('Logging out, clearing auth data')
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('isLoggedIn')
     setIsLoggedIn(false)
     setUser(null)
+    setRecentChatHistory([])
   }
 
   if (isLoading) {
@@ -481,10 +483,17 @@ export default function Home() {
               />
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/profile">
+              {/* Free Plan 按钮 - 根据登录状态显示不同行为 */}
+              <Link href={isLoggedIn ? "/profile" : "/login"}>
                 <div className="flex items-center space-x-2 bg-[#1a0a24] px-3 py-1 rounded-full text-sm hover:bg-[#2a1a34] transition-colors cursor-pointer">
                   <div className="h-8 w-8 rounded-full overflow-hidden">
-                    <Image src={user?.avatar || "/placeholder.svg?height=128&width=128&text=U"} alt="User" width={32} height={32} />
+                    {isLoggedIn ? (
+                      <Image src={user?.avatar || "/placeholder.svg?height=128&width=128&text=U"} alt="User" width={32} height={32} />
+                    ) : (
+                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                        <span className="text-xs text-gray-300">?</span>
+                      </div>
+                    )}
                   </div>
                   <div className="bg-[#2a1a34] px-3 py-1 rounded-full text-sm">Free Plan ↗</div>
                 </div>

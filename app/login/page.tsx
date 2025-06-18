@@ -63,6 +63,7 @@ export default function LoginPage() {
         console.log("Storing token (no Bearer):", token)
         localStorage.setItem("token", token)
         localStorage.setItem("user", JSON.stringify(data.user))
+        localStorage.setItem("isLoggedIn", "true")
 
         const storedToken = localStorage.getItem("token")
         console.log("Stored token:", storedToken)
