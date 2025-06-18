@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   ArrowLeft,
   Edit3,
@@ -17,6 +18,7 @@ import {
   Eye,
   EyeOff,
   MoreHorizontal,
+  LogOut,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,67 +30,149 @@ import { Label } from "@/components/ui/label"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import React from "react"
 
-// Mock user data
-const mockUserData = {
-  id: "user-w",
-  name: "未登录",
-  avatarSrc: "/placeholder.svg?height=96&width=96&text=W",
-  followers: "0",
-  following: "0",
-  interactions: "0",
-  description: "New user exploring the world of AI characters.",
-  privateCharacters: [
-    {
-      id: 1,
-      name: "My Secret Love",
-      tags: ["Private", "Romance"],
-      description: "A private character for personal conversations...",
-      chatCount: "0",
-      likeCount: "0",
-      imageSrc: "/placeholder.svg?height=400&width=300",
-      creator: { id: "user-w", name: "W", likeCount: "0" },
-      isPrivate: true,
-    },
-  ],
-  publicCharacters: [
-    {
-      id: 2,
-      name: "Friendly Assistant",
-      tags: ["Public", "Helper"],
-      description: "A helpful AI assistant for everyone...",
-      chatCount: "156",
-      likeCount: "23",
-      imageSrc: "/placeholder.svg?height=400&width=300",
-      creator: { id: "user-w", name: "W", likeCount: "23" },
-      isPrivate: false,
-    },
-  ],
+// User data interface
+interface UserData {
+  id: string
+  name: string
+  email: string
+  avatarSrc: string
+  followers: string
+  following: string
+  interactions: string
+  description: string
+  privateCharacters: Character[]
+  publicCharacters: Character[]
+  isPremium: boolean
+  usageStats: {
+    textReply: { current: number; limit: number }
+    pictureReply: { current: number; limit: number }
+    voiceReply: { current: number; limit: number }
+    createCharacter: { current: number; limit: number }
+    voiceCall: { current: string; limit: string }
+  }
+}
+
+interface Character {
+  id: string
+  name: string
+  tags: string[]
+  description: string
+  chatCount: string
+  likeCount: string
+  imageSrc: string
+  creator: { id: string; name: string; likeCount: string }
+  isPrivate: boolean
+  createdAt: string
 }
 
 export default function ProfilePage() {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false)
+  const [userData, setUserData] = React.useState<UserData | null>(null)
   const [editDescriptionOpen, setEditDescriptionOpen] = React.useState(false)
-  const [userDescription, setUserDescription] = React.useState(mockUserData.description)
+  const [userDescription, setUserDescription] = React.useState("")
   const [view, setView] = React.useState<"profile" | "creator">("profile")
   const [editDialogOpen, setEditDialogOpen] = React.useState(false)
-  const [userName, setUserName] = React.useState(mockUserData.name)
-  const [userAvatar, setUserAvatar] = React.useState(mockUserData.avatarSrc)
+  const [userName, setUserName] = React.useState("")
+  const [userAvatar, setUserAvatar] = React.useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
-  const [characterToDelete, setCharacterToDelete] = React.useState<any>(null)
+  const [characterToDelete, setCharacterToDelete] = React.useState<Character | null>(null)
 
-  // 获取用户信息
+  // 检查用户登录状态并加载用户数据
   React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      const user = JSON.parse(localStorage.getItem("user") || '{}')
-      if (user.username) {
-        setUserName(user.username)
-        mockUserData.name = user.username
-      }
-      if (user.avatar) {
-        setUserAvatar(user.avatar)
-        mockUserData.avatarSrc = user.avatar
+    const checkAuthAndLoadData = async () => {
+      try {
+        if (typeof window !== "undefined") {
+          const user = JSON.parse(localStorage.getItem("user") || '{}')
+          const isLoggedIn = localStorage.getItem("isLoggedIn") === "true"
+          
+          if (!isLoggedIn || !user.email) {
+            // 用户未登录，重定向到登录页
+            router.push("/login")
+            return
+          }
+
+          setIsAuthenticated(true)
+          
+          // 加载用户数据
+          const loadedUserData = await loadUserData(user)
+          setUserData(loadedUserData)
+          setUserName(loadedUserData.name)
+          setUserAvatar(loadedUserData.avatarSrc)
+          setUserDescription(loadedUserData.description)
+        }
+      } catch (error) {
+        console.error("Error loading user data:", error)
+        router.push("/login")
+      } finally {
+        setIsLoading(false)
       }
     }
-  }, [])
+
+    checkAuthAndLoadData()
+  }, [router])
+
+  // 从localStorage或API加载用户数据
+  const loadUserData = async (user: any): Promise<UserData> => {
+    // 首先尝试从localStorage加载保存的用户数据
+    const savedUserData = localStorage.getItem(`userData_${user.email}`)
+    
+    if (savedUserData) {
+      return JSON.parse(savedUserData)
+    }
+
+    // 如果没有保存的数据，创建默认数据结构
+    const defaultUserData: UserData = {
+      id: user.email,
+      name: user.username || user.email.split('@')[0],
+      email: user.email,
+      avatarSrc: user.avatar || "/placeholder.svg?height=96&width=96&text=" + (user.username?.[0] || "U"),
+      followers: "0",
+      following: "0", 
+      interactions: "0",
+      description: "New user exploring the world of AI characters.",
+      privateCharacters: [],
+      publicCharacters: [],
+      isPremium: false,
+      usageStats: {
+        textReply: { current: 0, limit: 50 },
+        pictureReply: { current: 0, limit: 1 },
+        voiceReply: { current: 0, limit: 3 },
+        createCharacter: { current: 0, limit: 1 },
+        voiceCall: { current: "0min", limit: "0s" }
+      }
+    }
+
+    // 检查是否有用户创建的角色
+    const userCharacters = JSON.parse(localStorage.getItem("userCharacters") || "[]")
+    const userCreatedCharacters = userCharacters.filter((char: any) => char.creatorId === user.email)
+    
+    // 分类私密和公开角色
+    defaultUserData.privateCharacters = userCreatedCharacters.filter((char: any) => char.isPrivate)
+    defaultUserData.publicCharacters = userCreatedCharacters.filter((char: any) => !char.isPrivate)
+    
+    // 更新创建角色的使用统计
+    defaultUserData.usageStats.createCharacter.current = userCreatedCharacters.length
+
+    // 保存用户数据
+    localStorage.setItem(`userData_${user.email}`, JSON.stringify(defaultUserData))
+    
+    return defaultUserData
+  }
+
+  // 保存用户数据
+  const saveUserData = (updatedData: UserData) => {
+    localStorage.setItem(`userData_${updatedData.email}`, JSON.stringify(updatedData))
+    setUserData(updatedData)
+  }
+
+  // 登出功能
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn")
+    localStorage.removeItem("user")
+    router.push("/login")
+  }
 
   const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -103,76 +187,124 @@ export default function ProfilePage() {
   }
 
   const handleEditDescription = () => {
-    mockUserData.description = userDescription
+    if (userData) {
+      const updatedData = { ...userData, description: userDescription }
+      saveUserData(updatedData)
+    }
     setEditDescriptionOpen(false)
+  }
+
+  const handleEditProfile = () => {
+    if (userData) {
+      const updatedData = { 
+        ...userData, 
+        name: userName, 
+        avatarSrc: userAvatar 
+      }
+      saveUserData(updatedData)
+      
+      // 同时更新localStorage中的用户信息
+      const user = JSON.parse(localStorage.getItem("user") || '{}')
+      user.username = userName
+      user.avatar = userAvatar
+      localStorage.setItem("user", JSON.stringify(user))
+    }
+    setEditDialogOpen(false)
+  }
+
+  const handleDeleteCharacter = (character: Character) => {
+    setCharacterToDelete(character)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteCharacter = () => {
+    if (characterToDelete && userData) {
+      // 从用户数据中删除角色
+      const updatedData = { ...userData }
+      
+      if (characterToDelete.isPrivate) {
+        updatedData.privateCharacters = updatedData.privateCharacters.filter(
+          (c) => c.id !== characterToDelete.id
+        )
+      } else {
+        updatedData.publicCharacters = updatedData.publicCharacters.filter(
+          (c) => c.id !== characterToDelete.id
+        )
+      }
+      
+      // 更新创建角色的使用统计
+      updatedData.usageStats.createCharacter.current = 
+        updatedData.privateCharacters.length + updatedData.publicCharacters.length
+      
+      saveUserData(updatedData)
+      
+      // 同时从全局角色列表中删除
+      const allCharacters = JSON.parse(localStorage.getItem("userCharacters") || "[]")
+      const filteredCharacters = allCharacters.filter((char: any) => char.id !== characterToDelete.id)
+      localStorage.setItem("userCharacters", JSON.stringify(filteredCharacters))
+    }
+    
+    setDeleteDialogOpen(false)
+    setCharacterToDelete(null)
+  }
+
+  // 如果正在加载，显示加载状态
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#1a0a24] to-[#2a1a34] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading your profile...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 如果未认证，不显示任何内容（会被重定向）
+  if (!isAuthenticated || !userData) {
+    return null
   }
 
   const usageStats = [
     {
       icon: MessageCircle,
       label: "Text reply",
-      current: 50,
-      limit: 50,
+      current: userData.usageStats.textReply.current,
+      limit: userData.usageStats.textReply.limit,
       color: "text-green-400",
     },
     {
       icon: ImageIcon,
       label: "Picture reply",
-      current: 1,
-      limit: 1,
+      current: userData.usageStats.pictureReply.current,
+      limit: userData.usageStats.pictureReply.limit,
       color: "text-blue-400",
     },
     {
       icon: Mic,
       label: "Voice reply",
-      current: 3,
-      limit: 3,
+      current: userData.usageStats.voiceReply.current,
+      limit: userData.usageStats.voiceReply.limit,
       color: "text-purple-400",
     },
     {
       icon: Users,
       label: "Create Character",
-      current: 1,
-      limit: 1,
+      current: userData.usageStats.createCharacter.current,
+      limit: userData.usageStats.createCharacter.limit,
       color: "text-orange-400",
     },
     {
       icon: Phone,
       label: "Voice Call",
-      current: "2min",
-      limit: "0s",
+      current: userData.usageStats.voiceCall.current,
+      limit: userData.usageStats.voiceCall.limit,
       color: "text-pink-400",
       isTime: true,
     },
   ]
 
-  const handleEditProfile = () => {
-    // Update user data
-    mockUserData.name = userName
-    mockUserData.avatarSrc = userAvatar
-    setEditDialogOpen(false)
-  }
-
-  const handleDeleteCharacter = (character: any) => {
-    setCharacterToDelete(character)
-    setDeleteDialogOpen(true)
-  }
-
-  const confirmDeleteCharacter = () => {
-    if (characterToDelete) {
-      if (characterToDelete.isPrivate) {
-        const index = mockUserData.privateCharacters.findIndex((c) => c.id === characterToDelete.id)
-        if (index > -1) mockUserData.privateCharacters.splice(index, 1)
-      } else {
-        const index = mockUserData.publicCharacters.findIndex((c) => c.id === characterToDelete.id)
-        if (index > -1) mockUserData.publicCharacters.splice(index, 1)
-      }
-    }
-    setDeleteDialogOpen(false)
-    setCharacterToDelete(null)
-  }
-
-  const CharacterCard = ({ character, showActions = false }: { character: any; showActions?: boolean }) => (
+  const CharacterCard = ({ character, showActions = false }: { character: Character; showActions?: boolean }) => (
     <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-200 group">
       <div className="relative aspect-[3/4]">
         <Image src={character.imageSrc || "/placeholder.svg"} alt={character.name} fill className="object-cover" />
@@ -249,13 +381,24 @@ export default function ProfilePage() {
               <ArrowLeft className="h-5 w-5" />
               <span className="text-sm font-medium">Back to Profile</span>
             </button>
-            <Badge
-              variant="outline"
-              className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border-green-500/30 text-green-300"
-            >
-              <Users className="h-3 w-3 mr-1" />
-              My Creator Page
-            </Badge>
+            <div className="flex items-center space-x-3">
+              <Badge
+                variant="outline"
+                className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border-green-500/30 text-green-300"
+              >
+                <Users className="h-3 w-3 mr-1" />
+                My Creator Page
+              </Badge>
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="border-red-500/30 text-red-400 hover:bg-red-500/20"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -271,9 +414,9 @@ export default function ProfilePage() {
               <div className="ml-4 mb-2">
                 <h1 className="text-2xl md:text-3xl font-bold text-white">{userName}</h1>
                 <div className="flex items-center space-x-4 text-sm text-gray-400 mt-1">
-                  <span>{mockUserData.followers} Followers</span>
-                  <span>{mockUserData.following} Following</span>
-                  <span>{mockUserData.interactions} Interactions</span>
+                  <span>{userData.followers} Followers</span>
+                  <span>{userData.following} Following</span>
+                  <span>{userData.interactions} Interactions</span>
                 </div>
               </div>
             </div>
@@ -297,26 +440,26 @@ export default function ProfilePage() {
                   value="all"
                   className="px-4 py-1.5 text-sm data-[state=active]:bg-pink-500 data-[state=active]:text-white text-gray-300"
                 >
-                  All ({mockUserData.privateCharacters.length + mockUserData.publicCharacters.length})
+                  All ({userData.privateCharacters.length + userData.publicCharacters.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="private"
                   className="px-4 py-1.5 text-sm data-[state=active]:bg-pink-500 data-[state=active]:text-white text-gray-300"
                 >
-                  Private ({mockUserData.privateCharacters.length})
+                  Private ({userData.privateCharacters.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="public"
                   className="px-4 py-1.5 text-sm data-[state=active]:bg-pink-500 data-[state=active]:text-white text-gray-300"
                 >
-                  Public ({mockUserData.publicCharacters.length})
+                  Public ({userData.publicCharacters.length})
                 </TabsTrigger>
               </TabsList>
             </div>
 
             <TabsContent value="all">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {[...mockUserData.privateCharacters, ...mockUserData.publicCharacters].map((char) => (
+                {[...userData.privateCharacters, ...userData.publicCharacters].map((char) => (
                   <CharacterCard key={char.id} character={char} showActions={true} />
                 ))}
               </div>
@@ -324,7 +467,7 @@ export default function ProfilePage() {
 
             <TabsContent value="private">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {mockUserData.privateCharacters.map((char) => (
+                {userData.privateCharacters.map((char) => (
                   <CharacterCard key={char.id} character={char} showActions={true} />
                 ))}
               </div>
@@ -332,7 +475,7 @@ export default function ProfilePage() {
 
             <TabsContent value="public">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {mockUserData.publicCharacters.map((char) => (
+                {userData.publicCharacters.map((char) => (
                   <CharacterCard key={char.id} character={char} showActions={true} />
                 ))}
               </div>
@@ -416,13 +559,28 @@ export default function ProfilePage() {
             <ArrowLeft className="h-5 w-5" />
             <span className="text-sm font-medium">Back to home</span>
           </Link>
-          <Badge
-            variant="outline"
-            className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-pink-500/30 text-pink-300"
-          >
-            <Crown className="h-3 w-3 mr-1" />
-            Free Plan
-          </Badge>
+          <div className="flex items-center space-x-3">
+            <Badge
+              variant="outline"
+              className={`${
+                userData.isPremium 
+                  ? "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/30 text-yellow-300"
+                  : "bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-pink-500/30 text-pink-300"
+              }`}
+            >
+              <Crown className="h-3 w-3 mr-1" />
+              {userData.isPremium ? "Premium" : "Free Plan"}
+            </Badge>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              size="sm"
+              className="border-red-500/30 text-red-400 hover:bg-red-500/20"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -450,7 +608,7 @@ export default function ProfilePage() {
           </div>
 
           <h1 className="text-2xl font-bold text-white mb-2">{userName}</h1>
-          <p className="text-gray-400 mb-4">0 Following</p>
+          <p className="text-gray-400 mb-4">{userData.following} Following</p>
 
           <Button
             onClick={() => setEditDialogOpen(true)}
@@ -467,9 +625,11 @@ export default function ProfilePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-white">Usage Statistics</h2>
-              <Link href="/premium" className="text-pink-400 hover:text-pink-300 text-sm font-medium transition-colors">
-                Upgrade Plan →
-              </Link>
+              {!userData.isPremium && (
+                <Link href="/premium" className="text-pink-400 hover:text-pink-300 text-sm font-medium transition-colors">
+                  Upgrade Plan →
+                </Link>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -524,20 +684,20 @@ export default function ProfilePage() {
             <Tabs defaultValue="all" className="w-full">
               <TabsList className="grid w-full grid-cols-3 bg-white/10 border border-white/20">
                 <TabsTrigger value="all" className="data-[state=active]:bg-pink-500 data-[state=active]:text-white">
-                  All ({mockUserData.privateCharacters.length + mockUserData.publicCharacters.length})
+                  All ({userData.privateCharacters.length + userData.publicCharacters.length})
                 </TabsTrigger>
                 <TabsTrigger value="private" className="data-[state=active]:bg-pink-500 data-[state=active]:text-white">
-                  Private ({mockUserData.privateCharacters.length})
+                  Private ({userData.privateCharacters.length})
                 </TabsTrigger>
                 <TabsTrigger value="public" className="data-[state=active]:bg-pink-500 data-[state=active]:text-white">
-                  Public ({mockUserData.publicCharacters.length})
+                  Public ({userData.publicCharacters.length})
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="all" className="mt-6">
-                {mockUserData.privateCharacters.length + mockUserData.publicCharacters.length > 0 ? (
+                {userData.privateCharacters.length + userData.publicCharacters.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {[...mockUserData.privateCharacters, ...mockUserData.publicCharacters].map((char) => (
+                    {[...userData.privateCharacters, ...userData.publicCharacters].map((char) => (
                       <CharacterCard key={char.id} character={char} />
                     ))}
                   </div>
@@ -559,9 +719,9 @@ export default function ProfilePage() {
               </TabsContent>
 
               <TabsContent value="private" className="mt-6">
-                {mockUserData.privateCharacters.length > 0 ? (
+                {userData.privateCharacters.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {mockUserData.privateCharacters.map((char) => (
+                    {userData.privateCharacters.map((char) => (
                       <CharacterCard key={char.id} character={char} />
                     ))}
                   </div>
@@ -577,9 +737,9 @@ export default function ProfilePage() {
               </TabsContent>
 
               <TabsContent value="public" className="mt-6">
-                {mockUserData.publicCharacters.length > 0 ? (
+                {userData.publicCharacters.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {mockUserData.publicCharacters.map((char) => (
+                    {userData.publicCharacters.map((char) => (
                       <CharacterCard key={char.id} character={char} />
                     ))}
                   </div>
@@ -647,15 +807,15 @@ export default function ProfilePage() {
                   className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-full px-4 py-2 text-sm"
                 >
                   <label htmlFor="avatar-upload" className="cursor-pointer">
-                    <Upload className="h-3 w-3 mr-2" />
-                    Upload
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload new photo
                   </label>
                 </Button>
               </div>
             </div>
 
             {/* Username Section */}
-            <div className="text-left">
+            <div>
               <Label htmlFor="username" className="text-base font-medium text-white mb-3 block">
                 Username
               </Label>
@@ -663,17 +823,16 @@ export default function ProfilePage() {
                 id="username"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                className="bg-[#0e0314] border-[#3a1a44] text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500 h-12"
+                className="bg-[#0e0314] border border-[#3a1a44] text-white placeholder-gray-400 focus:border-pink-500 focus:ring-pink-500"
                 placeholder="Enter your username"
               />
             </div>
 
-            {/* Update Button */}
             <Button
               onClick={handleEditProfile}
               className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white py-3 rounded-full text-base font-medium h-12"
             >
-              Update
+              Update Profile
             </Button>
           </div>
         </DialogContent>
