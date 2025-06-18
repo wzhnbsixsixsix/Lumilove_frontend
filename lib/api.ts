@@ -70,18 +70,17 @@ interface LoginResponse {
     const controller = new AbortController();
     
     try {
-      const response = await fetch(`${API_BASE_URL}/chat/stream`, {
+      // 直接调用RAG服务的认证流式接口
+      const response = await fetch(`http://54.206.37.109:8001/api/chat/message/stream/authenticated`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
-          'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
-          'X-Title': 'Lumilove',
         },
         body: JSON.stringify({
-          characterId,
-          message,
-          chatId,
+          user_id: "0", // 会被服务器覆盖
+          session_id: `user_0_character_${characterId}`,
+          message: message,
         }),
         signal: controller.signal,
       });
@@ -98,50 +97,33 @@ interface LoginResponse {
       const decoder = new TextDecoder();
       let buffer = '';
 
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-          buffer += decoder.decode(value, { stream: true });
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
 
-          while (true) {
-            const lineEnd = buffer.indexOf('\n');
-            if (lineEnd === -1) break;
-
-            const line = buffer.slice(0, lineEnd).trim();
-            buffer = buffer.slice(lineEnd + 1);
-
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              if (data === '[DONE]') {
-                onComplete();
-                return () => controller.abort();
-              }
-
-              try {
-                const parsed = JSON.parse(data);
-                const content = parsed.choices?.[0]?.delta?.content;
-                if (content) {
-                  onChunk(content);
-                }
-              } catch (e) {
-                console.warn('解析流式数据失败:', data);
-              }
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const content = line.slice(6);
+            if (content === '[DONE]') {
+              onComplete();
+              return () => controller.abort();
+            }
+            if (content.trim()) {
+              onChunk(content);
             }
           }
         }
-        onComplete();
-      } finally {
-        reader.cancel();
       }
+
+      onComplete();
     } catch (error) {
-      const err = error as Error;
-      if (err.name !== 'AbortError') {
-        onError(err.message || '流式请求出错');
-      }
+      onError(error instanceof Error ? error.message : String(error));
     }
-    
+
     return () => controller.abort();
   }
 
