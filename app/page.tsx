@@ -543,12 +543,12 @@ export default function Home() {
           <div className="relative rounded-xl overflow-hidden mb-8 gradient-bg">
             <div className="flex flex-col md:flex-row items-center p-6 md:p-10">
               <div className="md:w-1/2 mb-6 md:mb-0">
-                <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4">Create Your Ideal AI Lover</h2>
+                <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4">Welcome to the #1 Playground for Naughty AI Lovers</h2>
                 <p className="text-gray-300 mb-6 max-w-lg text-lg">
-                  Start creating your ideal AI lover today! Customize every detail, bring them to life, and dive into
-                  unforgettable stories together.
+                  Dive into a world of seductive characters, NSFW secrets, and intimate roleplays.
+                  Explore spicy photo packs, tease them, train them, or let them take control.
                 </p>
-                <Link href="/create">
+                <Link href="/create-lover">
                   <Button className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-6 h-auto rounded-full text-lg">
                     <span className="mr-2">+</span> START CREATING NOW
                   </Button>

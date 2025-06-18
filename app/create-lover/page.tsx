@@ -23,7 +23,7 @@ interface Selection {
 export default function CreateLoverPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
-  const [selections, setSelections] = useState<Selection>({ isPrivate: false })
+  const [selections, setSelections] = useState<Selection>({})
   const [isAnimating, setIsAnimating] = useState(false)
   const [autoAdvance, setAutoAdvance] = useState(true)
   const [showValidationError, setShowValidationError] = useState(false)
@@ -156,7 +156,7 @@ export default function CreateLoverPage() {
       case "Nympho":
         return "I've been waiting for you... 😈"
       case "Innocent":
-        return "Nice to meet you! I'm so excited to chat! 😊"
+        return "Hi there! I'm looking forward to getting to know you 😊"
       case "Dominant":
         return "You're here. Good. Let's see what you're made of."
       case "Submissive":
@@ -190,7 +190,7 @@ export default function CreateLoverPage() {
       description: `A ${selections.personality?.[0]?.toLowerCase() || "friendly"} ${selections.style?.toLowerCase() || "AI"} who loves ${selections.relationship?.toLowerCase() || "chatting"}. ${selections.bodyType} build with ${selections.personality?.join(", ").toLowerCase()} personality.`,
       images: [`/placeholder.svg?height=400&width=300&text=${characterName}`],
       createdAt: new Date().toISOString(),
-      isPrivate: selections.isPrivate || false,
+      isPrivate: selections.isPrivate ?? false,
       creatorId: "user", // 用户创建的角色
       stats: {
         views: 0,
@@ -235,7 +235,7 @@ export default function CreateLoverPage() {
       imageSrc: `/placeholder.svg?height=400&width=300&text=${characterName}`,
       tags: selections.personality || ["Friendly"],
       description: newCharacter.description,
-      isPrivate: selections.isPrivate || false,
+      isPrivate: selections.isPrivate ?? false,
       createdAt: new Date().toISOString(),
       stats: newCharacter.stats
     }
@@ -293,14 +293,14 @@ export default function CreateLoverPage() {
           <div className="w-20 h-20 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center">
             <Globe className="h-10 w-10 text-green-400" />
           </div>
-          <h3 className="text-white font-bold text-2xl mb-4">公开角色</h3>
+          <h3 className="text-white font-bold text-2xl mb-4">Public Character</h3>
           <p className="text-gray-300 text-lg leading-relaxed mb-6">
-            其他用户可以发现和查看您的角色。角色会出现在公开列表中，可以获得点赞和互动。
+            Other users can discover and view your character. Your character will appear in public listings and can receive likes and interactions.
           </p>
           <div className="bg-green-500/10 rounded-lg p-4">
             <div className="flex items-center justify-center text-green-400 text-sm">
               <Eye className="h-4 w-4 mr-2" />
-              可被其他用户发现
+              Discoverable by other users
             </div>
           </div>
         </div>
@@ -318,14 +318,14 @@ export default function CreateLoverPage() {
           <div className="w-20 h-20 mx-auto mb-6 bg-purple-500/20 rounded-full flex items-center justify-center">
             <Shield className="h-10 w-10 text-purple-400" />
           </div>
-          <h3 className="text-white font-bold text-2xl mb-4">私密角色</h3>
+          <h3 className="text-white font-bold text-2xl mb-4">Private Character</h3>
           <p className="text-gray-300 text-lg leading-relaxed mb-6">
-            只有您可以看到和使用这个角色。完全私密，不会出现在任何公开列表中。
+            Only you can see and use this character. Completely private and won't appear in any public listings.
           </p>
           <div className="bg-purple-500/10 rounded-lg p-4">
             <div className="flex items-center justify-center text-purple-400 text-sm">
               <EyeOff className="h-4 w-4 mr-2" />
-              仅您可见
+              Visible only to you
             </div>
           </div>
         </div>
@@ -676,8 +676,8 @@ export default function CreateLoverPage() {
       case 7:
         return (
           <div className="text-center">
-            <h2 className="text-4xl font-bold text-white mb-4">隐私设置</h2>
-            <p className="text-gray-300 text-xl mb-12">选择您的角色是公开还是私密</p>
+            <h2 className="text-4xl font-bold text-white mb-4">Privacy Settings</h2>
+            <p className="text-gray-300 text-xl mb-12">Choose whether your character is public or private</p>
             <PrivacySelector />
           </div>
         )
@@ -710,12 +710,12 @@ export default function CreateLoverPage() {
                   {selections.isPrivate ? (
                     <div className="flex items-center gap-2 bg-purple-500/20 px-3 py-1 rounded-full">
                       <EyeOff className="h-4 w-4 text-purple-400" />
-                      <span className="text-purple-400 text-sm">私密</span>
+                      <span className="text-purple-400 text-sm">Private</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 bg-green-500/20 px-3 py-1 rounded-full">
                       <Eye className="h-4 w-4 text-green-400" />
-                      <span className="text-green-400 text-sm">公开</span>
+                      <span className="text-green-400 text-sm">Public</span>
                     </div>
                   )}
                 </div>
@@ -845,7 +845,7 @@ export default function CreateLoverPage() {
 
               {/* 预览欢迎消息 */}
               <div className="mt-8 bg-[#1a0a24] rounded-lg p-6">
-                <h4 className="text-white font-medium mb-3">首条消息预览：</h4>
+                <h4 className="text-white font-medium mb-3">First message preview:</h4>
                 <p className="text-gray-300 italic">"{getWelcomeMessage()}"</p>
               </div>
             </div>

@@ -27,7 +27,7 @@ export default function RegisterPage() {
     
     // 验证密码是否匹配
     if (password !== confirmPassword) {
-      setError("密码不匹配，请重新输入")
+      setError("Passwords do not match, please re-enter")
       return
     }
 
@@ -52,7 +52,7 @@ export default function RegisterPage() {
       console.log('Raw response:', text)
 
       if (!text) {
-        throw new Error('服务器响应为空')
+        throw new Error('Empty server response')
       }
 
       let data
@@ -60,18 +60,18 @@ export default function RegisterPage() {
         data = JSON.parse(text)
       } catch (e) {
         console.error('Failed to parse JSON:', e)
-        throw new Error('服务器响应格式错误')
+        throw new Error('Invalid server response format')
       }
 
       if (response.ok) {
-        alert("注册成功！现在可以登录了")
+        alert("Registration successful! You can now login")
         router.push("/login")
       } else {
-        setError(data.message || "注册失败，请稍后重试")
+        setError(data.message || "Registration failed, please try again later")
       }
     } catch (error) {
       console.error("Registration error:", error)
-      setError("注册失败，请稍后重试")
+      setError("Registration failed, please try again later")
     } finally {
       setLoading(false)
     }
@@ -122,7 +122,7 @@ export default function RegisterPage() {
             <div className="space-y-2">
               <Label htmlFor="username" className="text-white font-medium text-sm flex items-center space-x-2">
                 <User className="h-4 w-4 text-pink-400" />
-                <span>用户名</span>
+                <span>Username</span>
               </Label>
               <div className="relative">
                 <Input
@@ -130,7 +130,7 @@ export default function RegisterPage() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="请输入用户名"
+                  placeholder="Enter your username"
                   required
                   className="h-12 bg-gradient-to-r from-[#0e0314]/80 to-[#1a0a24]/80 border-[#3a1a44] text-white placeholder-gray-500 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 rounded-xl backdrop-blur-sm transition-all duration-200"
                 />
@@ -142,7 +142,7 @@ export default function RegisterPage() {
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white font-medium text-sm flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-pink-400" />
-                <span>邮箱地址</span>
+                <span>Email Address</span>
               </Label>
               <div className="relative">
                 <Input
@@ -150,7 +150,7 @@ export default function RegisterPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="请输入邮箱"
+                  placeholder="Enter your email"
                   required
                   className="h-12 bg-gradient-to-r from-[#0e0314]/80 to-[#1a0a24]/80 border-[#3a1a44] text-white placeholder-gray-500 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 rounded-xl backdrop-blur-sm transition-all duration-200"
                 />
@@ -162,7 +162,7 @@ export default function RegisterPage() {
             <div className="space-y-2">
               <Label htmlFor="password" className="text-white font-medium text-sm flex items-center space-x-2">
                 <Lock className="h-4 w-4 text-pink-400" />
-                <span>密码</span>
+                <span>Password</span>
               </Label>
               <div className="relative">
                 <Input
@@ -170,7 +170,7 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="请输入密码"
+                  placeholder="Enter your password"
                   required
                   className="h-12 bg-gradient-to-r from-[#0e0314]/80 to-[#1a0a24]/80 border-[#3a1a44] text-white placeholder-gray-500 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 rounded-xl backdrop-blur-sm transition-all duration-200 pr-12"
                 />
@@ -189,7 +189,7 @@ export default function RegisterPage() {
             <div className="space-y-2">
               <Label htmlFor="confirmPassword" className="text-white font-medium text-sm flex items-center space-x-2">
                 <Lock className="h-4 w-4 text-pink-400" />
-                <span>确认密码</span>
+                <span>Confirm Password</span>
               </Label>
               <div className="relative">
                 <Input
@@ -197,7 +197,7 @@ export default function RegisterPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="请再次输入密码"
+                  placeholder="Confirm your password"
                   required
                   className="h-12 bg-gradient-to-r from-[#0e0314]/80 to-[#1a0a24]/80 border-[#3a1a44] text-white placeholder-gray-500 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 rounded-xl backdrop-blur-sm transition-all duration-200 pr-12"
                 />
@@ -221,10 +221,10 @@ export default function RegisterPage() {
               {loading ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>注册中...</span>
+                  <span>Creating account...</span>
                 </div>
               ) : (
-                "创建账户"
+                "Create Account"
               )}
             </Button>
           </form>
@@ -239,12 +239,12 @@ export default function RegisterPage() {
           {/* Login link */}
           <div className="text-center">
             <p className="text-gray-400 text-sm">
-              已有账户？{" "}
+              Already have an account?{" "}
               <Link
                 href="/login"
                 className="text-pink-400 hover:text-pink-300 transition-colors font-medium"
               >
-                立即登录
+                Sign in now
               </Link>
             </p>
           </div>
@@ -254,15 +254,15 @@ export default function RegisterPage() {
         <div className="mt-6 text-center">
           <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
             <Link href="/terms" className="hover:text-gray-400 transition-colors">
-              服务条款
+              Terms of Service
             </Link>
             <span>•</span>
             <Link href="/privacy" className="hover:text-gray-400 transition-colors">
-              隐私政策
+              Privacy Policy
             </Link>
             <span>•</span>
             <Link href="/help" className="hover:text-gray-400 transition-colors">
-              帮助中心
+              Help
             </Link>
           </div>
         </div>
