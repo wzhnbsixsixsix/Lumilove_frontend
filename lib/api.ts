@@ -71,7 +71,7 @@ interface LoginResponse {
     
     try {
       // 直接调用RAG服务的认证流式接口
-      const response = await fetch(`http://54.206.37.109:8001/api/chat/message/stream/authenticated`, {
+      const response = await fetch(`https://54.206.37.109:8001/api/chat/message/stream/authenticated`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
