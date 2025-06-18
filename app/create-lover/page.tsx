@@ -23,7 +23,7 @@ interface Selection {
 export default function CreateLoverPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
-  const [selections, setSelections] = useState<Selection>({ isPrivate: false })
+  const [selections, setSelections] = useState<Selection>({})
   const [isAnimating, setIsAnimating] = useState(false)
   const [autoAdvance, setAutoAdvance] = useState(true)
   const [showValidationError, setShowValidationError] = useState(false)
@@ -156,7 +156,7 @@ export default function CreateLoverPage() {
       case "Nympho":
         return "I've been waiting for you... 😈"
       case "Innocent":
-        return "Nice to meet you! I'm so excited to chat! 😊"
+        return "Hi there! I'm looking forward to getting to know you 😊"
       case "Dominant":
         return "You're here. Good. Let's see what you're made of."
       case "Submissive":
@@ -176,9 +176,18 @@ export default function CreateLoverPage() {
 
   // 创建角色的完整逻辑
   const createCharacter = () => {
-    const characterId = Date.now()
-    const characterName = `${selections.personality?.[0] || "My"} ${selections.style || "AI"}`
+    // 获取当前登录用户信息
+    const currentUser = JSON.parse(localStorage.getItem("user") || '{}')
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true"
+    
+    if (!isLoggedIn || !currentUser.email) {
+      alert("Please log in to create a character")
+      return null
+    }
 
+    const characterId = Date.now().toString()
+    const characterName = `${selections.personality?.[0] || "My"} ${selections.style || "AI"}`
+    
     // 创建完整角色数据结构
     const newCharacter = {
       id: characterId,
@@ -190,8 +199,16 @@ export default function CreateLoverPage() {
       description: `A ${selections.personality?.[0]?.toLowerCase() || "friendly"} ${selections.style?.toLowerCase() || "AI"} who loves ${selections.relationship?.toLowerCase() || "chatting"}. ${selections.bodyType} build with ${selections.personality?.join(", ").toLowerCase()} personality.`,
       images: [`/placeholder.svg?height=400&width=300&text=${characterName}`],
       createdAt: new Date().toISOString(),
-      isPrivate: selections.isPrivate || false,
-      creatorId: "user", // 用户创建的角色
+      isPrivate: selections.isPrivate ?? false,
+      creatorId: currentUser.email, // 使用用户邮箱作为创建者ID
+      creator: {
+        id: currentUser.email,
+        name: currentUser.username || currentUser.email.split('@')[0],
+        likeCount: "0"
+      },
+      chatCount: "0",
+      likeCount: "0",
+      imageSrc: `/placeholder.svg?height=400&width=300&text=${characterName}`,
       stats: {
         views: 0,
         likes: 0,
@@ -223,37 +240,34 @@ export default function CreateLoverPage() {
       ]
     }
 
-    // 1. 保存到用户数据（用于资料页面）
-    const existingUserData = JSON.parse(localStorage.getItem('mockUserData') || '{}')
-    if (!existingUserData.characters) {
-      existingUserData.characters = { private: [], public: [] }
+    // 1. 保存到全局角色列表（用于用户资料页面）
+    const existingUserCharacters = JSON.parse(localStorage.getItem('userCharacters') || '[]')
+    existingUserCharacters.push(newCharacter)
+    localStorage.setItem('userCharacters', JSON.stringify(existingUserCharacters))
+
+    // 2. 更新用户数据中的角色统计
+    const userData = JSON.parse(localStorage.getItem(`userData_${currentUser.email}`) || '{}')
+    if (userData.usageStats) {
+      userData.usageStats.createCharacter.current = (userData.usageStats.createCharacter.current || 0) + 1
+      
+      // 分类添加到私密或公开角色列表
+      if (selections.isPrivate) {
+        if (!userData.privateCharacters) userData.privateCharacters = []
+        userData.privateCharacters.push(newCharacter)
+      } else {
+        if (!userData.publicCharacters) userData.publicCharacters = []
+        userData.publicCharacters.push(newCharacter)
+      }
+      
+      localStorage.setItem(`userData_${currentUser.email}`, JSON.stringify(userData))
     }
 
-    const characterForProfile = {
-      id: characterId,
-      name: characterName,
-      imageSrc: `/placeholder.svg?height=400&width=300&text=${characterName}`,
-      tags: selections.personality || ["Friendly"],
-      description: newCharacter.description,
-      isPrivate: selections.isPrivate || false,
-      createdAt: new Date().toISOString(),
-      stats: newCharacter.stats
-    }
-
-    if (selections.isPrivate) {
-      existingUserData.characters.private.push(characterForProfile)
-    } else {
-      existingUserData.characters.public.push(characterForProfile)
-    }
-
-    localStorage.setItem('mockUserData', JSON.stringify(existingUserData))
-
-    // 2. 保存到聊天系统
+    // 3. 保存到聊天系统
     const existingChatCharacters = JSON.parse(localStorage.getItem('chatCharacters') || '{}')
-    existingChatCharacters[characterId.toString()] = newCharacter
+    existingChatCharacters[characterId] = newCharacter
     localStorage.setItem('chatCharacters', JSON.stringify(existingChatCharacters))
 
-    // 3. 触发数据更新事件
+    // 4. 触发数据更新事件
     window.dispatchEvent(new CustomEvent('userDataUpdated'))
 
     return newCharacter
@@ -860,6 +874,11 @@ export default function CreateLoverPage() {
   const handleFinalAction = () => {
     // 创建角色
     const newCharacter = createCharacter()
+    
+    // 如果角色创建失败（用户未登录），不继续执行
+    if (!newCharacter) {
+      return
+    }
     
     // 检查是否有付费功能
     const hasPremiumFeatures =
