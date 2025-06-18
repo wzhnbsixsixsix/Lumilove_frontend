@@ -1041,7 +1041,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                 href={`/chat/${chat.id}`}
                 key={chat.id}
                 className={`flex items-start p-3 lg:p-4 hover:bg-[#2a1a34] transition-colors rounded-xl mb-2 ${
-                  chat.id === chatId ? "bg-[#2a1a34]" : ""
+                  chat.id.toString() === chatId ? "bg-[#2a1a34]" : ""
                 }`}
               >
                 <div className="relative mr-3 lg:mr-4">
