@@ -1,6 +1,6 @@
 import axiosInstance from '../lib/axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://13.239.244.183:8080/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://16.176.180.19:8080/api';
 
 export interface LoginRequest {
   email: string;

@@ -1,7 +1,7 @@
 // API配置
 export const API_CONFIG = {
   // 生产环境的后端URL
-  BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://13.239.244.183:8443',
+  BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://16.176.180.19:8443',
   
   // API端点
   ENDPOINTS: {
