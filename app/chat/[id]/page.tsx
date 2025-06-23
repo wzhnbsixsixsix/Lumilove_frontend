@@ -162,8 +162,19 @@ export default function ChatPage() {
     updateUiState({ showFullImage: true });
   };
 
-  // Character data based on ID
-  const characters = {
+  // 获取用户创建的角色数据
+  const getUserCreatedCharacters = () => {
+    try {
+      const chatCharacters = JSON.parse(localStorage.getItem("chatCharacters") || "{}")
+      return chatCharacters
+    } catch (error) {
+      console.error("Error loading user created characters:", error)
+      return {}
+    }
+  }
+
+  // Character data based on ID (合并默认角色和用户创建的角色)
+  const defaultCharacters = {
     "1": {
       id: 1,
       name: "Ethan",
@@ -385,10 +396,17 @@ export default function ChatPage() {
       ],
     },
   };
+
+  // 合并默认角色和用户创建的角色
+  const characters = useMemo(() => {
+    const userCreatedCharacters = getUserCreatedCharacters()
+    return { ...defaultCharacters, ...userCreatedCharacters }
+  }, [])
+
   const [isLoading, setIsLoading] = useState(false);
   const character = useMemo(() => {
     return characters[chatId as keyof typeof characters] || characters["1"];
-  }, [chatId]);
+  }, [chatId, characters]);
 
   // 在组件顶部添加 token 状态
 
@@ -1529,12 +1547,17 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
 
             <div className="flex items-center justify-between mb-5">
               <div className="flex flex-wrap gap-2">
-                {character.tags.map((tag, index) => (
+                {character.tags.map((tag: string, index: number) => (
                   <Badge
                     key={index}
                     variant="outline"
-                    className="bg-[#1a0a24] text-xs px-2 py-1"
+                    className={`text-xs px-2 py-1 ${
+                      tag === "Private" 
+                        ? "bg-red-500/20 border-red-500 text-red-400" 
+                        : "bg-[#1a0a24] text-gray-300"
+                    }`}
                   >
+                    {tag === "Private" && <Lock className="h-3 w-3 mr-1 inline" />}
                     {tag}
                   </Badge>
                 ))}
@@ -1583,7 +1606,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
               </TabsList>
               <TabsContent value="pictures" className="p-4">
                 <div className="grid grid-cols-2 gap-2">
-                  {character.images.map((image, index) => (
+                  {character.images.map((image: string, index: number) => (
                     <div
                       key={index}
                       className="aspect-[3/4] rounded-lg overflow-hidden"
@@ -1743,7 +1766,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
           {/* Image Gallery */}
           <div className="relative h-72 overflow-hidden mb-6">
             <div className="flex space-x-3 overflow-x-auto pb-4 snap-x">
-              {character.images.map((image, index) => (
+              {character.images.map((image: string, index: number) => (
                 <div key={index} className="snap-center shrink-0">
                   <Image
                     src={image || "/placeholder.svg"}
@@ -1780,7 +1803,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
             </div>
 
             <div className="flex flex-wrap gap-2 mb-4">
-              {character.tags.map((tag, index) => (
+              {character.tags.map((tag: string, index: number) => (
                 <Badge
                   key={index}
                   variant="outline"

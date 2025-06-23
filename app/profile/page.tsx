@@ -111,7 +111,33 @@ export default function ProfilePage() {
     }
 
     checkAuthAndLoadData()
-  }, [router])
+
+    // 监听角色创建事件
+    const handleCharacterCreated = (event: any) => {
+      const newCharacter = event.detail
+      if (userData && newCharacter.creatorId === userData.id) {
+        // 重新加载用户数据以包含新角色
+        const user = JSON.parse(localStorage.getItem("user") || '{}')
+        loadUserData(user).then(setUserData)
+      }
+    }
+
+    // 监听用户数据更新事件
+    const handleUserDataUpdated = () => {
+      const user = JSON.parse(localStorage.getItem("user") || '{}')
+      if (user.email) {
+        loadUserData(user).then(setUserData)
+      }
+    }
+
+    window.addEventListener('characterCreated', handleCharacterCreated)
+    window.addEventListener('userDataUpdated', handleUserDataUpdated)
+
+    return () => {
+      window.removeEventListener('characterCreated', handleCharacterCreated)
+      window.removeEventListener('userDataUpdated', handleUserDataUpdated)
+    }
+  }, [router, userData])
 
   // 从localStorage或API加载用户数据
   const loadUserData = async (user: any): Promise<UserData> => {

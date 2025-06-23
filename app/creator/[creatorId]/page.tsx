@@ -247,13 +247,42 @@ const creatorsData = {
 export default function CreatorProfilePage({ params }: { params: Promise<{ creatorId: string }> }) {
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
+  const [creatorData, setCreatorData] = React.useState<any>(null)
+  const [isLoading, setIsLoading] = React.useState(true)
   
   // 使用React.use()来解包Promise参数
   const resolvedParams = React.use(params)
 
-  // 根据creatorId获取创作者数据
-  const creatorData = React.useMemo(() => {
-    return creatorsData[resolvedParams.creatorId as keyof typeof creatorsData] || null
+  // 加载创作者数据
+  React.useEffect(() => {
+    const loadCreatorData = () => {
+      // 首先尝试从动态创作者数据中加载
+      const dynamicCreatorData = localStorage.getItem(`creatorData_${resolvedParams.creatorId}`)
+      if (dynamicCreatorData) {
+        const parsedData = JSON.parse(dynamicCreatorData)
+        setCreatorData(parsedData)
+      } else {
+        // 如果没有动态数据，使用静态数据
+        const staticCreatorData = creatorsData[resolvedParams.creatorId as keyof typeof creatorsData]
+        setCreatorData(staticCreatorData || null)
+      }
+      setIsLoading(false)
+    }
+
+    loadCreatorData()
+
+    // 监听角色创建事件，更新创作者数据
+    const handleCharacterCreated = (event: any) => {
+      const newCharacter = event.detail
+      if (newCharacter.creatorId === resolvedParams.creatorId && !newCharacter.isPrivate) {
+        loadCreatorData()
+      }
+    }
+
+    window.addEventListener('characterCreated', handleCharacterCreated)
+    return () => {
+      window.removeEventListener('characterCreated', handleCharacterCreated)
+    }
   }, [resolvedParams.creatorId])
 
   const shareUrl = React.useMemo(() => {
@@ -264,6 +293,20 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ creat
     navigator.clipboard.writeText(shareUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <main className="flex-1 p-6 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-pink-500 mx-auto mb-4"></div>
+            <p className="text-white text-lg">Loading creator profile...</p>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   if (!creatorData) {
@@ -395,7 +438,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ creat
 
             <TabsContent value="characters">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {creatorData.characters.map((char) => (
+                {creatorData?.characters?.map((char: any) => (
                   <CharacterCard
                     key={char.id}
                     character={{
