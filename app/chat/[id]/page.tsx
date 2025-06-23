@@ -647,57 +647,88 @@ const handleQuickReply = (reply: string) => {
     "Just hearing your voice makes my heart beat faster. I wish you could see the effect you have on me right now.",
   ];
 
-  // Recent chats
-  const recentChats = [
-    {
-      id: 1,
-      name: "Ethan",
-      lastMessage: "He chuckles softly...",
-      imageSrc: "/avatar/female_01_avatar.png",
-      timestamp: "15:30",
-      unread: chatId !== "1",
-    },
-    {
-      id: 2,
-      name: "Alexander",
-      lastMessage: "I've been thinking about you...",
-      imageSrc: "/avatar/alexander_avatar.png",
-      timestamp: "Yesterday",
-      unread: chatId !== "2",
-    },
-    {
-      id: 3,
-      name: "Jake",
-      lastMessage: "Want to meet tonight?",
-      imageSrc: "/avatar/male_02_avatar.png",
-      timestamp: "Monday",
-      unread: chatId !== "3",
-    },
-    {
-      id: 4,
-      name: "Rhonda",
-      lastMessage: "I have a proposal for you...",
-      imageSrc: "/avatar/female_02_avatar.png",
-      timestamp: "Yesterday",
-      unread: chatId !== "4",
-    },
-    {
-      id: 5,
-      name: "Makenzie",
-      lastMessage: "Can you help me with this?",
-      imageSrc: "/avatar/female_03_avatar.png",
-      timestamp: "Tuesday",
-      unread: chatId !== "5",
-    },
-    {
-      id: 6,
-      name: "Anshu",
-      lastMessage: "My husband is away again...",
-      imageSrc: "/avatar/female_04_avatar.png",
-      timestamp: "Wednesday",
-      unread: chatId !== "6",
-    },
-  ];
+  // 动态获取聊天列表，包含用户创建的角色
+  const getRecentChats = useMemo(() => {
+    // 默认角色
+    const defaultChats = [
+      {
+        id: 1,
+        name: "Ethan",
+        lastMessage: "He chuckles softly...",
+        imageSrc: "/avatar/female_01_avatar.png",
+        timestamp: "15:30",
+        unread: chatId !== "1",
+        isPrivate: false,
+      },
+      {
+        id: 2,
+        name: "Alexander",
+        lastMessage: "I've been thinking about you...",
+        imageSrc: "/avatar/alexander_avatar.png",
+        timestamp: "Yesterday",
+        unread: chatId !== "2",
+        isPrivate: false,
+      },
+      {
+        id: 3,
+        name: "Jake",
+        lastMessage: "Want to meet tonight?",
+        imageSrc: "/avatar/male_02_avatar.png",
+        timestamp: "Monday",
+        unread: chatId !== "3",
+        isPrivate: false,
+      },
+      {
+        id: 4,
+        name: "Rhonda",
+        lastMessage: "I have a proposal for you...",
+        imageSrc: "/avatar/female_02_avatar.png",
+        timestamp: "Yesterday",
+        unread: chatId !== "4",
+        isPrivate: false,
+      },
+      {
+        id: 5,
+        name: "Makenzie",
+        lastMessage: "Can you help me with this?",
+        imageSrc: "/avatar/female_03_avatar.png",
+        timestamp: "Tuesday",
+        unread: chatId !== "5",
+        isPrivate: false,
+      },
+      {
+        id: 6,
+        name: "Anshu",
+        lastMessage: "My husband is away again...",
+        imageSrc: "/avatar/female_04_avatar.png",
+        timestamp: "Wednesday",
+        unread: chatId !== "6",
+        isPrivate: false,
+      },
+    ];
+
+    // 获取用户创建的角色
+    try {
+      const userCreatedCharacters = getUserCreatedCharacters();
+      const userChats = Object.values(userCreatedCharacters).map((character: any) => ({
+        id: character.id,
+        name: character.name,
+        lastMessage: "Just created! Say hello...",
+        imageSrc: character.avatarSrc || "/placeholder.svg?height=50&width=50&text=U",
+        timestamp: "Now",
+        unread: chatId !== character.id,
+        isPrivate: character.isPrivate || false,
+      }));
+
+      // 合并默认角色和用户创建的角色，用户创建的角色在前面
+      return [...userChats, ...defaultChats];
+    } catch (error) {
+      console.error("获取用户创建角色失败:", error);
+      return defaultChats;
+    }
+  }, [chatId]);
+
+  const recentChats = getRecentChats;
 
   // Quick reply suggestions
   const quickReplies = {
@@ -1075,6 +1106,11 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
                   {chat.unread && (
                     <div className="absolute -top-1 -right-1 bg-red-500 rounded-full h-4 w-4 lg:h-5 lg:w-5 flex items-center justify-center text-xs font-bold">
                       1
+                    </div>
+                  )}
+                  {chat.isPrivate && (
+                    <div className="absolute -bottom-1 -right-1 bg-red-500 rounded-full h-4 w-4 lg:h-5 lg:w-5 flex items-center justify-center">
+                      <Lock className="h-2.5 w-2.5 lg:h-3 lg:w-3 text-white" />
                     </div>
                   )}
                 </div>
