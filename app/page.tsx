@@ -11,7 +11,16 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react"
 import { buildApiUrl, API_CONFIG } from "@/lib/config"
-import { getCharacterById, getCharacterAvatar, getCharacterName } from "@/lib/characters"
+import { 
+  getCharacterById, 
+  getCharacterAvatar, 
+  getCharacterName,
+  getCharacters,
+  getTrendingCharacters,
+  getRecentChatCharacters,
+  getFilterTags,
+  type Character
+} from "@/lib/characters"
 
 interface User {
   username: string;
@@ -19,114 +28,13 @@ interface User {
   avatar?: string;
 }
 
-// 标签映射表
-const maleTagMap: Record<string, string> = {
-  "Alpha": "🔥 Dominant",
-  "Mature": "🔥 Dominant",
-  "Gentle": "💪 Muscle",
-  "Playful": "👦 MalePOV",
-  "Adventurous": "👦 MalePOV",
-  "Witty": "👦 MalePOV",
-  "Badboy": "💪 Muscle",
-  "Billionaire": "💪 Muscle",
-  "Cold Exterior": "🩸 Sadistic",
-  "Mysterious": "🩸 Sadistic",
-  "Anti-Hero": "🩸 Sadistic",
-  "Protective": "👶 CNC",
-  "Werewolf": "👹 Monster",
-  "Musician": "🧬 Breeding",
-  "Chef": "🧑‍🦰 Age Play",
-  "Police Officer": "🛏️ Step Roleplay",
-  "Mafia": "👹 Monster",
-  "Doctor": "🧠 Mind Break",
-  "Businessman": "🍭 Oral",
-  "Swimmer": "🍑 Anal",
-  "Boss": "🧑‍🤝‍🧑 Switch",
-}
-  
-const femaleTagMap: Record<string, string> = {
-  "Girl-Next-Door": "👧 FemalePOV",
-  "Innocent": "👧 FemalePOV",
-  "Elegant": "🌑 Yandere",
-  "Independent": "🙇 Submissive",
-  "Smart": "👩‍⚕️ Nurse",
-  "Caring": "🎒 Schoolgirl",
-  "Brave": "💼 Secretary",
-  "Nurturing": "👠 MILF",
-  "Teacher": "👩‍🦳 Mommy Dom",
-  "Nurse": "🚿 Shower",
-  "Cheerleader": "💧 Wet Scene",
-  "Lawyer": "🧸 Age Regression",
-  "Seductive": "🤫 Cheating",
-  "Playful": "😈 Villainess",
-  "Artist": "💃 Femme Fatale",
-  "Dancer": "🍑 Anal Play",
-  "Housewife": "👋 Spanking",
-  "Fashion Designer": "🏁 Edging",
-  "Doctor": "🙏 Begging",
-  "Entrepreneur": "📺 AI Assistant",
-  "Student": "🟪 Programmed",
-  "Mysterious": "🌑 Yandere",
-}
-
-// 过滤标签数组
-const maleFilterTags = [
-  "For You",
-  "Popular",
-  "🔥 Dominant",
-  "👦 MalePOV",
-  "💪 Muscle",
-  "🩸 Sadistic",
-  "👶 CNC",
-  "🧬 Breeding",
-  "🧑‍🦰 Age Play",
-  "🛏️ Step Roleplay",
-  "👹 Monster",
-  "🧠 Mind Break",
-  "🦶 Feet",
-  "🍭 Oral",
-  "🍑 Anal",
-  "🧑‍🤝‍🧑 Switch",
-]
-
-const femaleFilterTags = [
-  "For You",
-  "Popular",
-  "👧 FemalePOV",
-  "🌑 Yandere",
-  "🙇 Submissive",
-  "👩‍⚕️ Nurse",
-  "🎒 Schoolgirl",
-  "💼 Secretary",
-  "👠 MILF",
-  "👩‍🦳 Mommy Dom",
-  "🚿 Shower",
-  "💧 Wet Scene",
-  "🧸 Age Regression",
-  "🤫 Cheating",
-  "😈 Villainess",
-  "💃 Femme Fatale",
-  "🍑 Anal Play",
-  "👋 Spanking",
-  "🏁 Edging",
-  "🙏 Begging",
-  "📺 AI Assistant",
-  "🟪 Programmed",
-]
-
-// 标签映射函数
-const mapTags = (tags: string[], gender: 'guys' | 'girls'): string[] => {
-  const tagMap = gender === 'guys' ? maleTagMap : femaleTagMap
-  return tags.map(tag => tagMap[tag] || tag)
-}
+// 删除重复的标签映射和过滤标签定义，现在从 lib/characters.ts 中导入
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [activeGender, setActiveGender] = useState<'guys' | 'girls'>('guys')
-  const [showLoginModal, setShowLoginModal] = useState(false)
-  const [recentChatHistory, setRecentChatHistory] = useState<any[]>([])
   const [activeTag, setActiveTag] = useState("For You")
 
   useEffect(() => {
@@ -161,10 +69,6 @@ export default function Home() {
             console.log('Token verification successful')
             setIsLoggedIn(true)
             setUser(JSON.parse(userData))
-            
-            // 获取最近的聊天记录
-            const chatHistory = JSON.parse(localStorage.getItem('recentChats') || '[]')
-            setRecentChatHistory(chatHistory.slice(0, 3)) // 只取前3个
           } else {
             console.log('Token verification failed, clearing auth data')
             handleLogout()
@@ -191,7 +95,6 @@ export default function Home() {
     localStorage.removeItem('isLoggedIn')
     setIsLoggedIn(false)
     setUser(null)
-    setRecentChatHistory([])
   }
 
   if (isLoading) {
@@ -202,255 +105,22 @@ export default function Home() {
     )
   }
 
-  // explore的图片就放这里
-  const maleCharacters = [
-    {
-      id: 1,
-      name: "Alexander",
-      occupation: "Businessman",
-      tags: ["Alpha", "Mature"],
-      description: "The successful CEO who knows what he wants. Will you be his next conquest?",
-      chatCount: "1.4M",
-      imageSrc: "/alexander_pic1.png",
-      likeCount: "13.0K",
-      creator: { id: "alexmaster", name: "AlexMaster", likeCount: "13.0K" },
-    },
-    {
-      id: 2,
-      name: "Jake",
-      occupation: "Plumber",
-      tags: ["Playful", "Adventurous"],
-      description: "The handsome plumber with a playful side. He's ready to fix more than just your pipes.",
-      chatCount: "3.9K",
-      imageSrc: "/male/male_02.png",
-      likeCount: "9.5K",
-      creator: { id: "nightstalker", name: "NightStalker", likeCount: "9.5K" },
-    },
-    {
-      id: 3,
-      name: "Ethan",
-      occupation: "Swimmer",
-      tags: ["Athletic", "Mysterious"],
-      description:
-        "The talented swimmer who dominates the competition. But you're the only one who knows about your secret romance.",
-      chatCount: "1.7K",
-      imageSrc: "/male/male_03.png",
-      likeCount: "7.6K",
-      creator: { id: "roadrebel", name: "RoadRebel", likeCount: "7.6K" },
-    },
-    {
-      id: 13,
-      name: "Dominic",
-      occupation: "Mafia Boss",
-      tags: ["Alpha", "Mysterious", "Anti-Hero"],
-      description: "A dangerous man with a soft spot for you. He rules the underworld, but you rule his heart.",
-      chatCount: "45.2K",
-      imageSrc: "/male/male_04.png",
-      likeCount: "13.0K",
-      creator: { id: "alexmaster", name: "AlexMaster", likeCount: "13.0K" },
-    },
-    {
-      id: 14,
-      name: "Marcus",
-      occupation: "Doctor",
-      tags: ["Gentle", "Mature", "Caring"],
-      description: "A brilliant surgeon who saves lives. His gentle touch heals more than just physical wounds.",
-      chatCount: "28.7K",
-      imageSrc: "/male/male_05.png",
-      likeCount: "9.5K",
-      creator: { id: "nightstalker", name: "NightStalker", likeCount: "9.5K" },
-    },
-    {
-      id: 15,
-      name: "Ryan",
-      occupation: "Musician",
-      tags: ["Badboy", "Witty", "Adventurous"],
-      description: "A rockstar whose music speaks to your soul. Every song he writes is inspired by you.",
-      chatCount: "33.1K",
-      imageSrc: "/male/male_06.png",
-      likeCount: "7.6K",
-      creator: { id: "roadrebel", name: "RoadRebel", likeCount: "7.6K" },
-    },
-    {
-      id: 16,
-      name: "Gabriel",
-      occupation: "Police Officer",
-      tags: ["Protective", "Alpha", "Mysterious"],
-      description: "A dedicated cop who breaks all his own rules for you. He'll protect you from anything, even himself.",
-      chatCount: "19.8K",
-      imageSrc: "/male/male_7.png.png",
-      likeCount: "13.0K",
-      creator: { id: "alexmaster", name: "AlexMaster", likeCount: "13.0K" },
-    },
-    {
-      id: 17,
-      name: "Kai",
-      occupation: "Chef",
-      tags: ["Playful", "Gentle", "Witty"],
-      description: "A talented chef who cooks with passion. He knows the way to your heart is through your stomach.",
-      chatCount: "22.4K",
-      imageSrc: "/male/male_8.png.png",
-      likeCount: "9.5K",
-      creator: { id: "nightstalker", name: "NightStalker", likeCount: "9.5K" },
-    },
-    {
-      id: 18,
-      name: "Xavier",
-      occupation: "Billionaire",
-      tags: ["Billionaire", "Cold Exterior", "Mature"],
-      description: "A tech mogul with a cold exterior but a burning desire for you. Money can't buy what he truly wants.",
-      chatCount: "41.6K",
-      imageSrc: "/male/male_9.png.png",
-      likeCount: "7.6K",
-      creator: { id: "roadrebel", name: "RoadRebel", likeCount: "7.6K" },
-    },
-  ]
-
-  // Mock data for female characters
-  const femaleCharacters = [
-    {
-      id: 4,
-      name: "Rhonda",
-      occupation: "Entrepreneur",
-      tags: ["Elegant", "Mature"],
-      description:
-        "A fierce and flirty entrepreneur, Rhonda sees you as her perfect partner in both business and pleasure.",
-      chatCount: "22.2K",
-      imageSrc: "/female/female01.png",
-      likeCount: "5.2K",
-      creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
-    },
-    {
-      id: 5,
-      name: "Makenzie",
-      occupation: "Student",
-      tags: ["Girl-Next-Door", "Innocent"],
-      description: "A shy and repressed girl, hiding her deep attraction to you while trying to fit in.",
-      chatCount: "24.1K",
-      imageSrc: "/female/female_02.png",
-      likeCount: "193",
-      creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
-    },
-    {
-      id: 6,
-      name: "Anshu",
-      occupation: "Housewife",
-      tags: ["Girl-Next-Door", "Playful", "Seductive"],
-      description: "A reserved mother with a hidden perverted side, she will do anything to satisfy your desires.",
-      chatCount: "7.0K",
-      imageSrc: "/female/female_03.jpg",
-      likeCount: "204",
-      creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
-    },
-    {
-      id: 7,
-      name: "Isabella",
-      occupation: "Fashion Designer",
-      tags: ["Elegant", "Independent", "Smart"],
-      description: "A brilliant fashion designer with an eye for perfection. She knows what she wants and isn't afraid to take it.",
-      chatCount: "18.3K",
-      imageSrc: "/female/female_04.png",
-      likeCount: "193",
-      creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
-    },
-    {
-      id: 8,
-      name: "Sophia",
-      occupation: "Doctor",
-      tags: ["Caring", "Smart", "Brave"],
-      description: "A dedicated doctor who saves lives by day and has a secret wild side that only you get to discover.",
-      chatCount: "31.7K",
-      imageSrc: "/female/female_05.png",
-      likeCount: "204",
-      creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
-    },
-    {
-      id: 9,
-      name: "Luna",
-      occupation: "Artist",
-      tags: ["Mysterious", "Playful", "Smart"],
-      description: "A free-spirited artist who paints with passion. Her creativity extends beyond the canvas into every aspect of her life.",
-      chatCount: "12.5K",
-      imageSrc: "/female/female_06.png",
-      likeCount: "193",
-      creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
-    },
-    {
-      id: 10,
-      name: "Victoria",
-      occupation: "Lawyer",
-      tags: ["Independent", "Smart", "Seductive"],
-      description: "A powerful attorney who never loses a case. She's used to being in control, but will you be the exception?",
-      chatCount: "27.9K",
-      imageSrc: "/female/female_07.png",
-      likeCount: "204",
-      creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
-    },
-    {
-      id: 11,
-      name: "Emma",
-      occupation: "Teacher",
-      tags: ["Nurturing", "Girl-Next-Door", "Caring"],
-      description: "A sweet kindergarten teacher with a hidden naughty side. She's always ready to teach you new things.",
-      chatCount: "15.8K",
-      imageSrc: "/female/female_08.png",
-      likeCount: "193",
-      creator: { id: "mei-chan", name: "Mei chan", likeCount: "193" },
-    },
-    {
-      id: 12,
-      name: "Aria",
-      occupation: "Dancer",
-      tags: ["Elegant", "Seductive", "Playful"],
-      description: "A professional ballet dancer whose moves are as mesmerizing off the stage as they are on. Every gesture tells a story.",
-      chatCount: "20.4K",
-      imageSrc: "/female/female_09.png",
-      likeCount: "204",
-      creator: { id: "mei-chan", name: "Mei chan", likeCount: "204" },
-    },
-  ]
-
-  // Filter characters based on active gender and tag
-  const characters = activeGender === "guys" ? maleCharacters : femaleCharacters
-  const mappedCharacters = characters.map(char => ({
-    ...char,
-    tags: mapTags(char.tags, activeGender)
-  }))
+  // 使用新的数据管理系统获取角色
+  const characterData = getCharacters({
+    gender: activeGender === "guys" ? "male" : "female",
+    activeTag: activeTag,
+    pageSize: 20 // 增加页面大小以显示更多角色
+  })
   
-  const filteredCharacters = activeTag === "For You" || activeTag === "Popular" 
-    ? mappedCharacters 
-    : mappedCharacters.filter((char) => char.tags.includes(activeTag))
+  const filteredCharacters = characterData.characters
 
-  // Mock data for trending characters
-  //trending的图片就放这里
-  const trendingCharacters = [
-    { id: 1, name: "Alexander", occupation: "Businessman", rank: 1, imageSrc: "/avatar/alexander_avatar.png" },
-    { id: 2, name: "Dominic", occupation: "Mafia", rank: 2, imageSrc: "/avatar/female_03_avatar.png" },
-    { id: 3, name: "Ethan Blake", occupation: "Actor", rank: 3, imageSrc: "/avatar/female_04_avatar.png" },
-    { id: 4, name: "Gray", occupation: "Businessman", rank: 4, imageSrc: "/avatar/female_01_avatar.png" },
-    { id: 5, name: "Alex Starlight", occupation: "Musician", rank: 5, imageSrc: "/avatar/female_02_avatar.png" },
-  ]
+  // 使用新的数据管理系统获取趋势角色
+  const trendingCharacters = getTrendingCharacters('male', 5)
+  const trendingFemaleCharacters = getTrendingCharacters('female', 5)
 
-  // Mock data for trending female characters
-  const trendingFemaleCharacters = [
-    { id: 4, name: "Price", occupation: "Model", rank: 1, imageSrc: "/avatar/alexander_avatar.png" },
-    { id: 5, name: "Kie", occupation: "Dancer", rank: 2, imageSrc: "/avatar/female_03_avatar.png" },
-    {
-      id: 6,
-      name: "Yumi Yamamoto",
-      occupation: "Student",
-      rank: 3,
-      imageSrc: "/avatar/female_04_avatar.png",
-    },
-    { id: 7, name: "Aynaz", occupation: "Artist", rank: 4, imageSrc: "/avatar/female_01_avatar.png" },
-    { id: 8, name: "Joyce", occupation: "Teacher", rank: 5, imageSrc: "/avatar/female_02_avatar.png" },
-  ]
-
-  // Mock data for recent chats (only shown if there are any)
-  // Recent chats now come from localStorage and use correct character data
-
-  // Determine if we should show recent chats (in a real app, this would be based on user data)
-  const hasRecentChats = recentChatHistory.length > 0
+  // 使用新的数据管理系统获取最近聊天角色
+  const recentChatCharacters = getRecentChatCharacters(3)
+  const hasRecentChats = recentChatCharacters.length > 0
 
   return (
     <div className="flex min-h-screen">
@@ -515,27 +185,20 @@ export default function Home() {
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-3">Recent chat</h2>
               <div className="flex space-x-5">
-                {recentChatHistory.map((chat) => {
-                  // 使用统一的角色数据获取正确的头像
-                  const character = getCharacterById(chat.id);
-                  const avatarSrc = character?.avatarSrc || chat.imageSrc || getCharacterAvatar(chat.id);
-                  const characterName = character?.name || chat.name || getCharacterName(chat.id);
-                  
-                  return (
-                    <Link href={`/chat/${chat.id}`} key={chat.id} className="text-center">
-                      <div className="h-20 w-20 rounded-full overflow-hidden mx-auto mb-2 border-2 border-pink-500">
-                        <Image
-                          src={avatarSrc}
-                          alt={characterName}
-                          width={80}
-                          height={80}
-                          className="object-cover"
-                        />
-                      </div>
-                      <span className="text-base">{characterName}</span>
-                    </Link>
-                  );
-                })}
+                {recentChatCharacters.map((character) => (
+                  <Link href={`/chat/${character.id}`} key={character.id} className="text-center">
+                    <div className="h-20 w-20 rounded-full overflow-hidden mx-auto mb-2 border-2 border-pink-500">
+                      <Image
+                        src={character.avatarSrc}
+                        alt={character.name}
+                        width={80}
+                        height={80}
+                        className="object-cover"
+                      />
+                    </div>
+                    <span className="text-base">{character.name}</span>
+                  </Link>
+                ))}
               </div>
             </div>
           )}
@@ -599,7 +262,7 @@ export default function Home() {
           {/* Filter Tags */}
           <div className="flex overflow-x-auto pb-4 mb-6 scrollbar-hide">
             <div className="flex space-x-3">
-              {(activeGender === "guys" ? maleFilterTags : femaleFilterTags).map((tag: string, index: number) => (
+              {getFilterTags(activeGender === "guys" ? "male" : "female").map((tag: string, index: number) => (
                 <Badge
                   key={index}
                   variant={tag === activeTag ? "default" : "outline"}
