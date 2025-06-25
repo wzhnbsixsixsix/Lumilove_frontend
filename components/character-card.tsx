@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
 
 export interface Character {
-  id: number
+  id: number | string
   name: string
   description: string
   chatCount: string

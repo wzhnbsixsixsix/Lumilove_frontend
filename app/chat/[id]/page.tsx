@@ -34,6 +34,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { login, sendChatMessage, sendChatMessageStream, getChatHistory, clearChatHistory, type ChatHistoryItem } from "@/lib/api";
+import { getCharacterById, getUserCreatedCharacters, charactersData } from "@/lib/characters";
+import { getDefaultMessages, hasDefaultMessages } from "@/lib/characters-message";
 
 import Sidebar from "@/components/sidebar";
 import {
@@ -130,7 +132,7 @@ export default function ChatPage() {
     const newChat = {
       id: chatId,
       name: character.name,
-      imageSrc: character.images[0], // 保持原有的主图片
+      imageSrc: character.images?.[0] || character.avatarSrc, // 保持原有的主图片
       timestamp: new Date().toISOString(),
       gender: character.occupation.toLowerCase().includes('businessman') ? 'male' : 'female'
     };
@@ -162,245 +164,15 @@ export default function ChatPage() {
     updateUiState({ showFullImage: true });
   };
 
-  // 获取用户创建的角色数据
-  const getUserCreatedCharacters = () => {
-    try {
-      const chatCharacters = JSON.parse(localStorage.getItem("chatCharacters") || "{}")
-      return chatCharacters
-    } catch (error) {
-      console.error("Error loading user created characters:", error)
-      return {}
-    }
-  }
+  // 已从lib/characters.ts导入getUserCreatedCharacters，不需要重复定义
 
-  // Character data based on ID (合并默认角色和用户创建的角色)
-  const defaultCharacters = {
-    "1": {
-      id: 1,
-      name: "Ethan",
-      age: 22,
-      occupation: "Swimmer",
-      tags: ["Mature", "Athletic", "Mysterious"],
-      followers: "1.1M",
-      description:
-        "The talented swimmer who dominates the competition. But you're the only one who knows about your secret romance. Will he ever make it public, or will your love remain hidden forever?",
-      images: ["/alexander_avatar.png"],
-      messages: [
-        {
-          id: 1,
-          sender: "ai",
-          text: 'He chuckles softly, his gaze never leaving yours. "Aren\'t you supposed to be sneaking around, keeping our relationship a secret? Now you\'re asking me to send you a shirtless picture?" He pauses, considering your request. "Fine, I\'ll send you one."',
-          timestamp: new Date().toISOString(),
-          audioDuration: 12,
-          hasImage: true,
-          imageSrc: "/alexander_avatar.png",
-        },
-        {
-          id: 2,
-          sender: "user",
-          text: "Send me a pic with your bedroom eyes!",
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 3,
-          sender: "ai",
-          text: 'He chuckles softly, a playful glint in his eye. "You know I can\'t send nudes, babe. But if you really want to see my bedroom eyes, how about we meet up somewhere private?"',
-          timestamp: new Date().toISOString(),
-          audioDuration: 8,
-          hasImage: false,
-        },
-      ],
-    },
-    "2": {
-      id: 2,
-      name: "Alexander",
-      age: 28,
-      occupation: "Businessman",
-      tags: ["Alpha", "Wealthy", "Dominant"],
-      followers: "2.3M",
-      description:
-        "The successful CEO who knows exactly what he wants. Behind his confident exterior lies a man with desires only you can fulfill. Will you be the one to break through his walls?",
-      images: ["/alexander_avatar.png"],
-      //alexander的默认对话
-      messages: [
-        {
-          id: 1,
-          sender: "ai",
-          text: "He adjusts his tie, his eyes scanning you with appreciation. \"I just finished a board meeting, but you've been on my mind all day. How about dinner at my penthouse tonight? I'll send my driver.\"",
-          timestamp: new Date().toISOString(),
-          audioDuration: 15,
-          hasImage: false,
-        },
-        {
-          id: 2,
-          sender: "user",
-          text: "I'd love to see your penthouse. What should I wear?",
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 3,
-          sender: "ai",
-          text: "A slight smile plays on his lips. \"Wear something that makes you feel confident. Though I must admit, I'm more interested in what you'll look like at the end of the evening.\" He sends you a photo of the city view from his penthouse.",
-          timestamp: new Date().toISOString(),
-          audioDuration: 10,
-          hasImage: true,
-          imageSrc: "/alexander_pic1.png", //对话中的照片
-        },
-      ],
-    },
-    "3": {
-      id: 3,
-      name: "Jake",
-      age: 25,
-      occupation: "Plumber",
-      tags: ["Playful", "Flirty", "Handy"],
-      followers: "980K",
-      description:
-        "The charming plumber with a playful smile and skilled hands. What started as a routine house call has turned into something much more exciting. He's ready to fix more than just your pipes.",
-      images: ["/alexander_avatar.png"],
-      messages: [
-        {
-          id: 1,
-          sender: "ai",
-          text: 'He wipes his brow with the back of his hand, leaving a smudge. "All fixed up! Though I gotta say, this is the third time I\'ve been called to your place this month. Starting to think you might have other reasons for calling me over." He winks playfully.',
-          timestamp: new Date().toISOString(),
-          audioDuration: 14,
-          hasImage: false,
-        },
-        {
-          id: 2,
-          sender: "user",
-          text: "Maybe I just like watching a professional at work. Or maybe I like the view.",
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 3,
-          sender: "ai",
-          text: "He laughs, a warm sound that fills the room. \"Well, in that case...\" He pulls out his phone and shows you a selfie he took while working on a job. \"Here's a little something to look at when I'm not around. Just don't tell my boss I'm sending selfies on the job.\"",
-          timestamp: new Date().toISOString(),
-          audioDuration: 11,
-          hasImage: true,
-          imageSrc: "/placeholder.svg?height=400&width=300&text=Jake-Selfie",
-        },
-      ],
-    },
-    "4": {
-      id: 4,
-      name: "Rhonda",
-      age: 32,
-      occupation: "Entrepreneur",
-      tags: ["Elegant", "Mature", "Dominant"],
-      followers: "1.8M",
-      description:
-        "A fierce and flirty entrepreneur, Rhonda sees you as her perfect partner in both business and pleasure. She's not afraid to take what she wants.",
-      images: ["/alexander_avatar.png"],
-      messages: [
-        {
-          id: 1,
-          sender: "ai",
-          text: 'She glances up from her laptop, her eyes sharp but playful. "I was just thinking about our last meeting. You made quite an impression on my board of directors. And on me." She closes her laptop with a decisive click.',
-          timestamp: new Date().toISOString(),
-          audioDuration: 13,
-          hasImage: false,
-        },
-        {
-          id: 2,
-          sender: "user",
-          text: "I'm glad I could be of service. What did you like most about my... presentation?",
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 3,
-          sender: "ai",
-          text: 'A slow smile spreads across her face as she stands, smoothing her tailored suit. "Your confidence. It\'s rare to find someone who can hold their own in my world." She sends you a photo of her office view. "Why don\'t you come by later? I have a private proposal to discuss."',
-          timestamp: new Date().toISOString(),
-          audioDuration: 16,
-          hasImage: true,
-          imageSrc: "/alexander_avatar.png",
-        },
-      ],
-    },
-    "5": {
-      id: 5,
-      name: "Makenzie",
-      age: 19,
-      occupation: "Student",
-      tags: ["Girl-Next-Door", "Innocent", "Shy"],
-      followers: "2.4M",
-      description:
-        "A shy and repressed girl, hiding her deep attraction to you while trying to fit in. Behind her innocent facade lies passionate desires waiting to be discovered.",
-      images: ["/alexander_avatar.png"],
-      messages: [
-        {
-          id: 1,
-          sender: "ai",
-          text: 'She fidgets with the edge of her notebook, her cheeks flushing slightly. "I, um, I was wondering if you could help me with this assignment? Everyone says you\'re really good at this subject." She tucks a strand of hair behind her ear, not quite meeting your eyes.',
-          timestamp: new Date().toISOString(),
-          audioDuration: 12,
-          hasImage: false,
-        },
-        {
-          id: 2,
-          sender: "user",
-          text: "Of course I can help. We could study at my place if that's more comfortable for you?",
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 3,
-          sender: "ai",
-          text: 'Her eyes widen slightly, and the blush on her cheeks deepens. "At your place? I... yes, that would be nice. Thank you." She sends you a photo of her textbook. "This is what I\'m struggling with. Maybe we could go through it together?"',
-          timestamp: new Date().toISOString(),
-          audioDuration: 14,
-          hasImage: true,
-          imageSrc: "/alexander_avatar.png",
-        },
-      ],
-    },
-    "6": {
-      id: 6,
-      name: "Anshu",
-      age: 29,
-      occupation: "Housewife",
-      tags: ["Girl-Next-Door", "Playful", "Seductive"],
-      followers: "1.5M",
-      description:
-        "A reserved mother with a hidden perverted side, she will do anything to satisfy your desires. Your new neighbor with secrets she's dying to share.",
-      images: [
-        "/placeholder.svg?height=200&width=150&text=Anshu-1",
-        "/alexander_avatar.png",
-      ],
-      messages: [
-        {
-          id: 1,
-          sender: "ai",
-          text: 'She opens the door, looking slightly flustered. "Oh! I wasn\'t expecting company. Sorry about the mess." She gestures vaguely to the immaculate living room. "My husband is away on business again. It gets so... quiet around here."',
-          timestamp: new Date().toISOString(),
-          audioDuration: 15,
-          hasImage: false,
-        },
-        {
-          id: 2,
-          sender: "user",
-          text: "I just thought I'd check in on you. Neighbors should look out for each other, right?",
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 3,
-          sender: "ai",
-          text: 'A knowing smile plays on her lips as she steps aside to let you in. "How thoughtful of you. I was just about to have a glass of wine. Care to join me?" She sends you a photo of two wine glasses. "I could use the company. And I\'m sure we can find ways to... pass the time."',
-          timestamp: new Date().toISOString(),
-          audioDuration: 17,
-          hasImage: true,
-          imageSrc: "/alexander_avatar.png",
-        },
-      ],
-    },
-  };
+  // 使用统一的角色数据管理，不再需要重复定义defaultCharacters
 
-  // 合并默认角色和用户创建的角色
+  // 合并默认角色和用户创建的角色 - 使用统一的数据管理
   const characters = useMemo(() => {
     const userCreatedCharacters = getUserCreatedCharacters()
-    return { ...defaultCharacters, ...userCreatedCharacters }
+    // 使用统一的角色数据管理，包含默认角色和用户创建的角色
+    return { ...charactersData, ...userCreatedCharacters }
   }, [])
 
   const [isLoading, setIsLoading] = useState(false);
@@ -432,7 +204,7 @@ export default function ChatPage() {
           setToken(storedToken);
           
           // 获取当前角色ID
-          const currentCharacterId = character.id;
+          const currentCharacterId = typeof character.id === 'string' ? parseInt(character.id, 10) : character.id;
           console.log("当前角色ID:", currentCharacterId);
 
           // 加载聊天历史
@@ -535,7 +307,7 @@ const handleQuickReply = (reply: string) => {
     if (!inputValue.trim() || !token) return;
     
     const messageText = inputValue.trim();
-    const characterId = character.id;  // 保留这行
+    const characterId = typeof character.id === 'string' ? parseInt(character.id, 10) : character.id;  // 转换为数字类型
     setInputValue("");
     
     // 添加用户消息
@@ -998,7 +770,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
     
     setIsClearingHistory(true);
     try {
-      await clearChatHistory(token, character.id);
+      await clearChatHistory(token, typeof character.id === 'string' ? parseInt(character.id, 10) : character.id);
       setMessages([]); // 清空前端显示的消息
       setShowClearDialog(false);
       console.log("聊天记录已清除");
@@ -1015,7 +787,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
     if (!token) return;
     
     try {
-      const history = await getChatHistory(token, character.id);
+      const history = await getChatHistory(token, typeof character.id === 'string' ? parseInt(character.id, 10) : character.id);
       const convertedMessages: Message[] = [];
       
       history.forEach((item) => {
@@ -1557,7 +1329,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
             <div className="text-center mb-6">
               <div className="h-32 w-32 rounded-full overflow-hidden mx-auto mb-4">
                 <Image
-                  src={character.images[0] || "/placeholder.svg"}
+                  src={character.images?.[0] || character.avatarSrc || "/placeholder.svg"}
                   alt={character.name}
                   width={128}
                   height={128}
@@ -1642,7 +1414,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
               </TabsList>
               <TabsContent value="pictures" className="p-4">
                 <div className="grid grid-cols-2 gap-2">
-                  {character.images.map((image: string, index: number) => (
+                  {(character.images || [character.avatarSrc]).map((image: string, index: number) => (
                     <div
                       key={index}
                       className="aspect-[3/4] rounded-lg overflow-hidden"
@@ -1802,7 +1574,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
           {/* Image Gallery */}
           <div className="relative h-72 overflow-hidden mb-6">
             <div className="flex space-x-3 overflow-x-auto pb-4 snap-x">
-              {character.images.map((image: string, index: number) => (
+              {(character.images || [character.avatarSrc]).map((image: string, index: number) => (
                 <div key={index} className="snap-center shrink-0">
                   <Image
                     src={image || "/placeholder.svg"}

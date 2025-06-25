@@ -3,10 +3,10 @@ import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface TrendingCharacter {
-  id: number
+  id: number | string
   name: string
   occupation: string
-  rank: number
+  rank?: number
   imageSrc: string
 }
 
@@ -36,7 +36,7 @@ export default function TrendingList({ characters }: { characters: TrendingChara
                       className="object-cover"
                     />
                   </div>
-                  {character.rank <= 3 && (
+                  {character.rank && character.rank <= 3 && (
                     <div className="absolute -top-1 -right-1 bg-yellow-500 rounded-full h-4 w-4 flex items-center justify-center text-[10px] font-bold">
                       {character.rank}
                     </div>
