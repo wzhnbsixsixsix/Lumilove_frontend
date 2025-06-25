@@ -19,7 +19,7 @@ export const defaultMessages: Record<string, DefaultMessage[]> = {
       timestamp: new Date().toISOString(),
       audioDuration: 12,
       hasImage: true,
-      imageSrc: "/alexander_avatar.png",
+      imageSrc: "/avatar/alexander_avatar.png",
     },
     {
       id: 2,
@@ -108,7 +108,7 @@ export const defaultMessages: Record<string, DefaultMessage[]> = {
       timestamp: new Date().toISOString(),
       audioDuration: 16,
       hasImage: true,
-      imageSrc: "/alexander_avatar.png",
+      imageSrc: "/avatar/alexander_avatar.png",
     },
   ],
   "5": [
@@ -133,7 +133,7 @@ export const defaultMessages: Record<string, DefaultMessage[]> = {
       timestamp: new Date().toISOString(),
       audioDuration: 14,
       hasImage: true,
-      imageSrc: "/alexander_avatar.png",
+      imageSrc: "/avatar/alexander_avatar.png",
     },
   ],
   "6": [
@@ -158,7 +158,7 @@ export const defaultMessages: Record<string, DefaultMessage[]> = {
       timestamp: new Date().toISOString(),
       audioDuration: 17,
       hasImage: true,
-      imageSrc: "/alexander_avatar.png",
+      imageSrc: "/avatar/alexander_avatar.png",
     },
   ],
 };
