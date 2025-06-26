@@ -4,7 +4,10 @@
       "Bash(npm run:*)",
       "Bash(pnpm run:*)",
       "Bash(grep:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm build)"
     ],
     "deny": []
   }
