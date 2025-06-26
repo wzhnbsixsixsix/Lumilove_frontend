@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useState, useEffect } from "react"
-import { buildApiUrl, API_CONFIG } from "@/lib/config"
+import { AuthAPI } from "@/lib/api/auth"
 import { 
   getCharacterById, 
   getCharacterAvatar, 
@@ -47,25 +47,11 @@ export default function Home() {
       
       if (token && userData) {
         try {
-          const tokenValue = `Bearer ${token}`;
-          console.log('Sending token:', tokenValue)
+          console.log('Verifying token...')
           
-          const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.AUTH.VERIFY), {
-            method: 'GET',
-            headers: {
-              'Authorization': tokenValue,
-              'Content-Type': 'application/json',
-              'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
-              'X-Title': 'Lumilove',
-            },
-            credentials: 'include'
-          })
+          const isValid = await AuthAPI.verifyToken()
           
-          console.log('Verify response status:', response.status)
-          const responseText = await response.text()
-          console.log('Verify response body:', responseText)
-          
-          if (response.ok) {
+          if (isValid) {
             console.log('Token verification successful')
             setIsLoggedIn(true)
             setUser(JSON.parse(userData))

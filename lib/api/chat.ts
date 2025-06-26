@@ -10,18 +10,57 @@ import {
   StreamErrorCallback,
   ApiResponse 
 } from './types';
-import { API_PATHS } from './config';
-import { AuthAPI } from './auth';
+import { API_PATHS, COMMON_HEADERS } from './config';
+import { STORAGE_KEYS } from './config';
 
 export class ChatAPI {
+  /**
+   * 获取存储的token
+   */
+  private static getToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(STORAGE_KEYS.TOKEN);
+  }
+
+  /**
+   * 获取用户ID
+   */
+  private static getUserId(): string {
+    try {
+      if (typeof window === 'undefined') return "0";
+      
+      const userData = localStorage.getItem(STORAGE_KEYS.USER);
+      if (!userData) return "0";
+      
+      const user = JSON.parse(userData);
+      
+      // 按优先级尝试获取用户ID
+      if (user.id) return user.id.toString();
+      if (user.userId) return user.userId.toString();
+      if (user.email) {
+        return user.email.split('@')[0];
+      }
+      
+      return "0";
+    } catch (error) {
+      console.error('获取用户ID失败:', error);
+      return "0";
+    }
+  }
   /**
    * 获取聊天历史
    */
   static async getChatHistory(characterId: number): Promise<ChatHistoryItem[]> {
     try {
+      console.log('🔍 开始获取聊天历史, characterId:', characterId);
+      console.log('🔍 API路径:', `${API_PATHS.CHAT.HISTORY}/${characterId}`);
+      console.log('🔍 当前token:', this.getToken());
+      
       const response = await mainApiClient.get<ChatHistoryResponse>(
         `${API_PATHS.CHAT.HISTORY}/${characterId}`
       );
+
+      console.log('🔍 聊天历史API响应:', response);
 
       if (!response.success) {
         throw new Error(response.error || '获取聊天历史失败');
@@ -64,7 +103,7 @@ export class ChatAPI {
     
     try {
       // 获取用户ID
-      const userId = AuthAPI.getUserId();
+      const userId = this.getUserId();
       
       // 构建请求数据
       const requestData: StreamChatRequest = {
@@ -77,13 +116,12 @@ export class ChatAPI {
 
       // 发起流式请求
       const url = ragApiClient.buildURL(API_PATHS.CHAT.MESSAGE_STREAM);
+      console.log('🌐 请求URL:', url);
       const response = await fetch(url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${AuthAPI.getToken()}`,
-          'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
-          'X-Title': 'Lumilove'
+          ...COMMON_HEADERS,
+          'Authorization': `Bearer ${this.getToken()}`
         },
         body: JSON.stringify(requestData),
         signal: controller.signal

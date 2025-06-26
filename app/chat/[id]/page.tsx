@@ -33,7 +33,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { login, sendChatMessage, sendChatMessageStream, getChatHistory, clearChatHistory, type ChatHistoryItem } from "@/lib/api";
+import { ChatAPI } from "@/lib/api/chat";
+import type { ChatHistoryItem } from "@/lib/api/types";
 import { getCharacterById, getUserCreatedCharacters, charactersData } from "@/lib/characters";
 import { getDefaultMessages, hasDefaultMessages } from "@/lib/characters-message";
 
@@ -208,7 +209,7 @@ export default function ChatPage() {
           console.log("当前角色ID:", currentCharacterId);
 
           // 加载聊天历史
-          const history = await getChatHistory(storedToken, currentCharacterId);
+          const history = await ChatAPI.getChatHistory(currentCharacterId);
           console.log("成功加载聊天历史:", history);
           
           if (history && history.length > 0) {
@@ -334,10 +335,8 @@ const handleQuickReply = (reply: string) => {
     try {
       let accumulatedContent = "";
       
-      await sendChatMessageStream(
-        token,
+      await ChatAPI.sendStreamMessage(
         messageText,
-        chatId,
         characterId,  // 使用变量
         (content: string) => {
           accumulatedContent += content;
@@ -770,7 +769,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
     
     setIsClearingHistory(true);
     try {
-      await clearChatHistory(token, typeof character.id === 'string' ? parseInt(character.id, 10) : character.id);
+      await ChatAPI.clearChatHistory(typeof character.id === 'string' ? parseInt(character.id, 10) : character.id);
       setMessages([]); // 清空前端显示的消息
       setShowClearDialog(false);
       console.log("聊天记录已清除");
@@ -787,7 +786,7 @@ const hardcodedResponses: Record<string, { text: string; imageSrc: string; audio
     if (!token) return;
     
     try {
-      const history = await getChatHistory(token, typeof character.id === 'string' ? parseInt(character.id, 10) : character.id);
+      const history = await ChatAPI.getChatHistory(typeof character.id === 'string' ? parseInt(character.id, 10) : character.id);
       const convertedMessages: Message[] = [];
       
       history.forEach((item) => {

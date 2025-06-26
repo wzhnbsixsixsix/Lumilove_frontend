@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Heart, Eye, EyeOff, Mail, Lock } from "lucide-react"
-import { buildApiUrl, API_CONFIG } from "@/lib/config"
+import { AuthAPI } from "@/lib/api/auth"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -26,53 +26,10 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "HTTP-Referer": "https://main.d3m01u43jjmlec.amplifyapp.com/",
-          "X-Title": "Lumilove",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-        credentials: "include",
-      })
-
-      const text = await response.text()
-      console.log("Raw login response:", text)
-
-      let data
-      try {
-        data = JSON.parse(text)
-        console.log("Parsed login response:", data)
-      } catch (e) {
-        console.error("Response parsing error:", e)
-        throw new Error("服务器响应格式错误")
-      }
-
-      if (response.ok) {
-        if (!data.accessToken) {
-          console.error("Login response missing accessToken:", data)
-          throw new Error("服务器响应缺少accessToken")
-        }
-
-        const token = data.accessToken.replace(/^Bearer\s+/, "")
-        console.log("Storing token (no Bearer):", token)
-        localStorage.setItem("token", token)
-        localStorage.setItem("user", JSON.stringify(data.user))
-        localStorage.setItem("isLoggedIn", "true")
-
-        const storedToken = localStorage.getItem("token")
-        console.log("Stored token:", storedToken)
-
-        router.push("/")
-      } else {
-        console.error("Login failed:", data)
-        setError(data.message || "登录失败，请检查邮箱和密码")
-      }
+      const response = await AuthAPI.login({ email, password })
+      console.log("Login response:", response)
+      
+      router.push("/")
     } catch (error) {
       console.error("Login error:", error)
       setError("登录失败，请稍后重试")

@@ -1,4 +1,4 @@
-import { API_CONFIG } from './config';
+import { CURRENT_API, COMMON_HEADERS } from './api/config';
 
 interface LoginResponse {
     accessToken: string;
@@ -9,15 +9,13 @@ interface LoginResponse {
     // Add other response fields as needed
   }
 
-  const API_BASE_URL = `${API_CONFIG.BASE_URL}/api`;
+  const API_BASE_URL = CURRENT_API.MAIN;
   
   export async function login(email: string, password: string): Promise<string> {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
-        'X-Title': 'Lumilove',
+        ...COMMON_HEADERS,
       },
       body: JSON.stringify({ email, password }),
     });
@@ -39,10 +37,8 @@ interface LoginResponse {
     const response = await fetch(`${API_BASE_URL}/chat`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        ...COMMON_HEADERS,
         'Authorization': `Bearer ${accessToken}`,
-        'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
-        'X-Title': 'Lumilove',
       },
       body: JSON.stringify({
         characterId,
@@ -86,10 +82,10 @@ interface LoginResponse {
       }
       
       // 直接调用RAG服务的认证流式接口
-      const response = await fetch(`https://54.206.37.109:8001/api/chat/message/stream/authenticated`, {
+      const response = await fetch(`${CURRENT_API.RAG}/chat/message/stream/authenticated`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          ...COMMON_HEADERS,
           'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
@@ -169,9 +165,8 @@ interface LoginResponse {
     const response = await fetch(`${API_BASE_URL}/chat/history/${characterId}`, {
       method: 'GET',
       headers: {
+        ...COMMON_HEADERS,
         'Authorization': `Bearer ${accessToken}`,
-        'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
-        'X-Title': 'Lumilove',
       },
     });
 
@@ -198,10 +193,8 @@ interface LoginResponse {
       const response = await fetch(`${API_BASE_URL}/chat/history/${characterId}`, {
         method: 'DELETE',
         headers: {
+          ...COMMON_HEADERS,
           'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
-          'X-Title': 'Lumilove',
         },
       });
 

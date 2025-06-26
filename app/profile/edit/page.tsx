@@ -4,7 +4,7 @@ import { useState, useRef } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { buildApiUrl, API_CONFIG } from "@/lib/config"
+import { UserAPI } from "@/lib/api/user"
 
 export default function EditProfilePage() {
   const router = useRouter()
@@ -98,53 +98,10 @@ export default function EditProfilePage() {
       avatar: preview,
     }
     try {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        setError('请先登录')
-        router.push('/login')
-        return
-      }
-
-      const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.USERS.PROFILE), {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'HTTP-Referer': 'https://main.d3m01u43jjmlec.amplifyapp.com/',
-          'X-Title': 'Lumilove',
-        },
-        credentials: 'include',
-        body: JSON.stringify(user),
-      })
-
-      if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        setError('登录已过期，请重新登录')
-        router.push('/login')
-        return
-      }
-
-      let data
-      try {
-        const text = await response.text()
-        data = text ? JSON.parse(text) : {}
-      } catch (e) {
-        console.error('Response parsing error:', e)
-        data = {}
-      }
-
-      if (response.ok) {
-        const updatedUser = {
-          ...JSON.parse(localStorage.getItem('user') || '{}'),
-          username: user.username,
-          avatar: user.avatar
-        }
-        localStorage.setItem('user', JSON.stringify(updatedUser))
-        router.push('/profile')
-      } else {
-        setError(data.message || '更新失败，请稍后重试')
-      }
+      const updatedUser = await UserAPI.updateProfile(user)
+      console.log('Profile update response:', updatedUser)
+      
+      router.push('/profile')
     } catch (err) {
       console.error('Update profile error:', err)
       setError('网络错误，请稍后重试')

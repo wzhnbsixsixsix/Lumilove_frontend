@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Heart, Eye, EyeOff, Mail, Lock, User } from "lucide-react"
-import { buildApiUrl, API_CONFIG } from "@/lib/config"
+import { AuthAPI } from "@/lib/api/auth"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -34,41 +34,11 @@ export default function RegisterPage() {
     setLoading(true)
     
     try {
-      const response = await fetch(buildApiUrl(API_CONFIG.ENDPOINTS.AUTH.REGISTER), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-        }),
-        credentials: 'include'
-      })
-
-      const text = await response.text()
-      console.log('Raw response:', text)
-
-      if (!text) {
-        throw new Error('Empty server response')
-      }
-
-      let data
-      try {
-        data = JSON.parse(text)
-      } catch (e) {
-        console.error('Failed to parse JSON:', e)
-        throw new Error('Invalid server response format')
-      }
-
-      if (response.ok) {
-        alert("Registration successful! You can now sign in")
-        router.push("/login")
-      } else {
-        setError(data.message || "Registration failed, please try again later")
-      }
+      const response = await AuthAPI.register({ username, email, password })
+      console.log('Register response:', response)
+      
+      alert("Registration successful! You can now sign in")
+      router.push("/login")
     } catch (error) {
       console.error("Registration error:", error)
       setError("Registration failed, please try again later")

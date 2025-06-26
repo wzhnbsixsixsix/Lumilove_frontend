@@ -86,6 +86,19 @@ export class AuthAPI {
   }
 
   /**
+   * 验证token有效性
+   */
+  static async verifyToken(): Promise<boolean> {
+    try {
+      const response = await mainApiClient.get<any>('/auth/verify');
+      return !!response;
+    } catch (error) {
+      console.error('Token验证失败:', error);
+      return false;
+    }
+  }
+
+  /**
    * 检查登录状态
    */
   static isLoggedIn(): boolean {
