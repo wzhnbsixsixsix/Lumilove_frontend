@@ -115,9 +115,9 @@ export default function ProfilePage() {
     // 监听角色创建事件
     const handleCharacterCreated = (event: any) => {
       const newCharacter = event.detail
-      if (userData && newCharacter.creatorId === userData.id) {
+      const user = JSON.parse(localStorage.getItem("user") || '{}')
+      if (user.email && newCharacter.creatorId === user.email) {
         // 重新加载用户数据以包含新角色
-        const user = JSON.parse(localStorage.getItem("user") || '{}')
         loadUserData(user).then(setUserData)
       }
     }
@@ -137,7 +137,7 @@ export default function ProfilePage() {
       window.removeEventListener('characterCreated', handleCharacterCreated)
       window.removeEventListener('userDataUpdated', handleUserDataUpdated)
     }
-  }, [router, userData])
+  }, [router]) // 移除userData依赖，避免无限循环
 
   // 从localStorage或API加载用户数据
   const loadUserData = async (user: any): Promise<UserData> => {
